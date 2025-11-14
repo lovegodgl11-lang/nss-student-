@@ -32,7 +32,7 @@
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.05);
         }
-        .form-input {
+        .form-input, .form-textarea {
             width: 100%; padding: 0.75rem; border: 1px solid var(--border-color);
             border-radius: 0.5rem; font-size: 1rem; background-color: var(--bg-secondary);
         }
@@ -59,9 +59,12 @@
 
         /* Live Class View */
         .control-btn { width: 48px; height: 48px; border-radius: 50%; background-color: rgba(255,255,255,0.2); color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; transition: background-color 0.2s; }
-        .control-btn:hover { background-color: rgba(255,255,255,0.3); }
+        .control-btn:hover:not(:disabled) { background-color: rgba(255,255,255,0.3); }
+        .control-btn:disabled { background-color: rgba(107, 114, 128, 0.5); cursor: not-allowed; }
         .control-btn.danger { background-color: #ef4444; }
         .control-btn.danger:hover { background-color: #dc2626; }
+        .control-btn.active { background-color: var(--accent-primary); }
+        .control-btn.muted { background-color: #f87171; }
     </style>
 <link rel="stylesheet" href="/index.css">
 
@@ -105,6 +108,7 @@
                 <button data-tab="attendance" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clip-rule="evenodd"></path></svg> <span class="nav-text">My Attendance</span></button>
                 <button data-tab="results" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 3.75a.75.75 0 0 1 .75.75v14.03l3.2-3.261a.75.75 0 1 1 1.07 1.05l-4.5 4.604a.75.75 0 0 1-1.07 0l-4.5-4.604a.75.75 0 1 1 1.07-1.05l3.2 3.261V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"></path></svg> <span class="nav-text">My Results</span></button>
                 <button data-tab="diary" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.348 2.595.341 1.24 1.518 1.905 2.66 1.905H6.44l4.5 4.5c.945.945 2.56.276 2.56-1.06V4.06Z"></path></svg> <span class="nav-text">School Diary</span></button>
+                <button data-tab="leave" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21.721 12.752a9.711 9.711 0 0 0-9.45-8.216.75.75 0 0 1-.614-1.425 11.211 11.211 0 0 1 11.439 9.544.75.75 0 0 1-1.375.397Z"></path><path d="M12.025 15.343a.75.75 0 1 0-1.05 1.05l2.25 2.25a.75.75 0 0 0 1.05 0l4.5-4.5a.75.75 0 0 0-1.05-1.05L13.5 15.688l-1.475-1.345Z"></path><path d="M3.75 21V9.75l7.5-5.325 7.5 5.325V21h-4.5v-6a1.5 1.5 0 0 0-3 0v6H3.75Z"></path></svg> <span class="nav-text">Apply for Leave</span></button>
             </div>
             <div class="p-2 border-t mt-auto">
                 <button id="logout-btn" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-red-600 hover:bg-red-50">
@@ -135,7 +139,7 @@
         <button data-tab="dashboard" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 4.5a3 3 0 0 0-3 3v.75a.75.75 0 0 1-1.5 0v-.75a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5v.75a.75.75 0 0 1-1.5 0v-.75a3 3 0 0 0-3-3h-3Z"></path><path fill-rule="evenodd" d="M2.25 12c0-3.573 2.642-6.535 6.07-7.122A.75.75 0 0 1 9 5.628v12.744a.75.75 0 0 1-1.192.594C4.354 18.2 2.25 15.34 2.25 12ZM15 5.628a.75.75 0 0 0-1.192-.594C17.646 5.7 21.75 8.66 21.75 12c0 3.573-2.642 6.535-6.07 7.122A.75.75 0 0 0 15 18.372V5.628Z" clip-rule="evenodd"></path></svg> Dashboard</button>
         <button data-tab="homework" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.25 4.533A9.708 9.708 0 0 0 6 3.75a9.708 9.708 0 0 0-5.25.783V18a9.708 9.708 0 0 0 5.25.783a9.708 9.708 0 0 0 5.25-.783V4.533Z"></path><path d="M12.75 3.75a9.708 9.708 0 0 1 5.25.783V18a9.708 9.708 0 0 1-5.25.783a9.708 9.708 0 0 1-5.25-.783V4.533c.359-.092.73-.162 1.114-.211A9.73 9.73 0 0 1 8.25 3.75a9.73 9.73 0 0 1 4.5 0Z"></path></svg> Homework</button>
         <button data-tab="liveclass" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3h-15Zm-1.5 3a1.5 1.5 0 0 1 1.5-1.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5-1.5h-15a1.5 1.5 0 0 1-1.5-1.5v-9Z"></path><path d="M10.03 10.03a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-.75-.75a.75.75 0 1 1 1.06-1.06l.22.22 1.72-1.72a.75.75 0 0 1 1.06 0Zm6-2.25a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75Z"></path></svg> Classes</button>
-        <button data-tab="diary" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.348 2.595.341 1.24 1.518 1.905 2.66 1.905H6.44l4.5 4.5c.945.945 2.56.276 2.56-1.06V4.06Z"></path></svg> Diary</button>
+        <button data-tab="leave" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"><svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21.721 12.752a9.711 9.711 0 0 0-9.45-8.216.75.75 0 0 1-.614-1.425 11.211 11.211 0 0 1 11.439 9.544.75.75 0 0 1-1.375.397Z"></path><path d="M12.025 15.343a.75.75 0 1 0-1.05 1.05l2.25 2.25a.75.75 0 0 0 1.05 0l4.5-4.5a.75.75 0 0 0-1.05-1.05L13.5 15.688l-1.475-1.345Z"></path><path d="M3.75 21V9.75l7.5-5.325 7.5 5.325V21h-4.5v-6a1.5 1.5 0 0 0-3 0v6H3.75Z"></path></svg> Leave</button>
         <button data-tab="id-card" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"></path><path fill-rule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v14.25c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 19.125V4.875ZM3 16.5c0 .207.168.375.375.375h17.25a.375.375 0 0 0 .375-.375V9.75A.75.75 0 0 0 20.25 9h-1.355a3 3 0 0 1-2.91-2.583A6 6 0 0 0 12 3.75c-1.61 0-3.094.633-4.186 1.667A3.001 3.001 0 0 1 4.905 9H3.75a.75.75 0 0 0-.75.75v6.75Z" clip-rule="evenodd"></path></svg> Profile</button>
     </div>
 
@@ -156,6 +160,7 @@
     let attendanceRecords = [];
     let results = [];
     let announcements = [];
+    let leaveApplications = [];
     let localStream = null;
     let peerConnection; // For student-teacher WebRTC connection
     let activeDBListeners = [];
@@ -171,7 +176,7 @@
     }
     function logout() {
         sessionStorage.removeItem('loggedInUser');
-        student = null; homework = []; liveClasses = []; attendanceRecords = []; results = []; announcements = [];
+        student = null; homework = []; liveClasses = []; attendanceRecords = []; results = []; announcements = []; leaveApplications = [];
         if (localStream) {
             localStream.getTracks().forEach(track => track.stop());
             localStream = null;
@@ -270,7 +275,7 @@
     async function joinLiveClass(classId) {
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            const studentParticipant = { id: student.id, name: student.studentName };
+            const studentParticipant = { id: student.id, name: student.studentName, handRaised: false };
             const classRef = db.ref(`liveClasses/${classId}`);
             
             await classRef.child(`participants/${student.id}`).set(studentParticipant);
@@ -288,6 +293,11 @@
     }
 
     async function leaveLiveClass(classId) {
+        const classroomView = document.getElementById('classroom-view');
+        if (classroomView) classroomView.remove();
+        document.getElementById('app-container').classList.remove('hidden');
+        document.getElementById('bottom-nav').classList.remove('hidden');
+
         if (localStream) {
             localStream.getTracks().forEach(track => track.stop());
             localStream = null;
@@ -334,8 +344,8 @@
 
         addDBListener(signalingRef.child('fromTeacher/candidates'), 'child_added', snap => {
             const candidate = snap.val();
-            if (candidate) {
-                peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            if (candidate && peerConnection.signalingState !== "closed") {
+                peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch(e => console.log(e));
             }
         });
     }
@@ -347,51 +357,79 @@
         const classroomEl = document.createElement('div');
         classroomEl.id = 'classroom-view';
         classroomEl.innerHTML = `
-            <div class="fixed inset-0 bg-gray-800 flex flex-col md:flex-row">
+            <div class="fixed inset-0 bg-gray-800 flex flex-col">
                 <div class="flex-1 bg-black flex items-center justify-center relative">
-                    <video id="teacher-video" autoplay playsinline class="h-full w-full object-cover"></video>
+                    <video id="teacher-video" autoplay playsinline class="h-full w-full object-contain"></video>
                     <div class="teacher-placeholder absolute inset-0 flex flex-col items-center justify-center text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-24 h-24 text-gray-700"><path d="M11.7 2.81a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l3.18 3.18a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-3.18 3.18a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0L8.81 16.2a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l3.18-3.18Z" /></svg>
                         <h3 class="text-xl font-bold mt-4">Waiting for teacher's video...</h3>
                     </div>
-                    <div class="absolute bottom-4 right-4 w-32 h-24 md:w-48 md:h-36 rounded-lg overflow-hidden border-2 border-white/50">
+                    <div id="self-view-container" class="absolute top-4 right-4 w-32 h-24 md:w-48 md:h-36 rounded-lg overflow-hidden border-2 border-white/50 bg-black">
                         <video id="my-video" autoplay playsinline muted class="h-full w-full object-cover transform -scale-x-100"></video>
+                        <div id="teacher-control-msg" class="absolute inset-0 bg-black/70 text-white text-xs text-center p-2 hidden items-center justify-center"></div>
                     </div>
-                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 p-3 rounded-full flex gap-4">
-                        <button id="mic-btn" class="control-btn"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8.25 4.5a3.75 3.75 0 1 1 7.5 0v8.25a3.75 3.75 0 1 1-7.5 0V4.5Z" /><path d="M6 15a.75.75 0 0 1 .75.75v.008c0 3.036 2.464 5.5 5.5 5.5s5.5-2.464 5.5-5.5v-.008a.75.75 0 0 1 1.5 0v.008a7 7 0 0 1-7 7s-7-3.134-7-7v-.008A.75.75 0 0 1 6 15Z" /></svg></button>
-                        <button id="video-btn" class="control-btn"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-2.845l3.52 1.87a.75.75 0 0 0 1.23-.654V8.13a.75.75 0 0 0-1.23-.655L15.75 9.345V7.5a3 3 0 0 0-3-3H4.5Z" /></svg></button>
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 p-3 rounded-full flex gap-4 z-20">
+                        <button id="mic-btn" class="control-btn active"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8.25 4.5a3.75 3.75 0 1 1 7.5 0v8.25a3.75 3.75 0 1 1-7.5 0V4.5Z" /><path d="M6 15a.75.75 0 0 1 .75.75v.008c0 3.036 2.464 5.5 5.5 5.5s5.5-2.464 5.5-5.5v-.008a.75.75 0 0 1 1.5 0v.008a7 7 0 0 1-7 7s-7-3.134-7-7v-.008A.75.75 0 0 1 6 15Z" /></svg></button>
+                        <button id="video-btn" class="control-btn active"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-2.845l3.52 1.87a.75.75 0 0 0 1.23-.654V8.13a.75.75 0 0 0-1.23-.655L15.75 9.345V7.5a3 3 0 0 0-3-3H4.5Z" /></svg></button>
+                        <button id="screen-share-btn" class="control-btn" title="Share Screen"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21.75 12.75a.75.75 0 0 0-1.5 0v2.25H3.75v-2.25a.75.75 0 0 0-1.5 0v2.25A2.25 2.25 0 0 0 4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V12.75Z" /><path d="m12 14.25-4.5-4.5.75-.75L11.25 12v-8.25h1.5V12l3-3 .75.75-4.5 4.5Z" /></svg></button>
+                        <button id="raise-hand-btn" class="control-btn"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M14.25 10.5A2.25 2.25 0 0 1 12 12.75v-2.25a2.25 2.25 0 0 1 2.25-2.25Z" /><path fill-rule="evenodd" d="M14.25 2.25a.75.75 0 0 1 .75.75v3.44l1.72-.86a.75.75 0 1 1 .76 1.314l-2.004 1.002a3.75 3.75 0 0 1-3.738 0l-2.003-1.002a.75.75 0 1 1 .76-1.315l1.72.861V3a.75.75 0 0 1 .75-.75Zm-3 9.75a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5ZM12 12A1.5 1.5 0 1 1 12 9a1.5 1.5 0 0 1 0 3Z" clip-rule="evenodd" /></svg></button>
                         <button id="leave-class-btn" class="control-btn danger"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.25 5.25a.75.75 0 0 0-1.5 0v4.32L6.873 7.72a.75.75 0 0 0-1.054 1.07l1.9 1.85-1.9 1.85a.75.75 0 1 0 1.054 1.07L8.75 11.68v4.57a.75.75 0 0 0 1.5 0v-4.57l1.877 1.82a.75.75 0 1 0 1.054-1.07l-1.9-1.85 1.9-1.85a.75.75 0 0 0-1.054-1.07L10.25 9.57V5.25Z" /></svg></button>
                     </div>
-                </div>
-                <div class="w-full md:w-80 bg-gray-900 text-white flex flex-col">
-                     <div class="p-3 border-b border-gray-700">Chat</div>
-                     <div id="chat-messages" class="p-3 flex-1 overflow-y-auto flex flex-col-reverse"></div>
-                     <form id="chat-form" class="p-3 border-t border-gray-700 flex gap-2"><input type="text" id="chat-input-field" class="bg-gray-800 text-white rounded p-2 flex-1" placeholder="Type..." required><button type="submit" class="bg-green-600 rounded p-2">Send</button></form>
                 </div>
             </div>`;
         document.body.appendChild(classroomEl);
 
         document.getElementById('my-video').srcObject = localStream;
-        document.getElementById('leave-class-btn').onclick = () => {
-            leaveLiveClass(classId);
-            document.getElementById('classroom-view').remove();
-            document.getElementById('app-container').classList.remove('hidden');
-        };
+        document.getElementById('leave-class-btn').onclick = () => leaveLiveClass(classId);
         
         cleanupDBListeners();
 
-        const chatRef = db.ref(`liveClasses/${classId}/chat`);
-        addDBListener(chatRef, 'child_added', snap => {
-            const msg = snap.val();
-            const chatBox = document.getElementById('chat-messages');
-            if (!chatBox) return;
-            // Chat messages are appended, so we insert at the top for reverse column layout
-            const msgDiv = document.createElement('div');
-            msgDiv.classList.add('chat-message', 'mb-2', msg.senderId === student.id ? 'self' : 'other');
-            msgDiv.innerHTML = `<div class="font-bold text-sm">${msg.senderName}</div><div>${msg.text}</div>`;
-            chatBox.insertBefore(msgDiv, chatBox.firstChild);
+        // Listener for teacher controls
+        const controlsRef = db.ref(`liveClasses/${classId}/controls/${student.id}`);
+        addDBListener(controlsRef, 'value', snap => {
+            const controls = snap.val() || {};
+            const micBtn = document.getElementById('mic-btn');
+            const videoBtn = document.getElementById('video-btn');
+            const controlMsg = document.getElementById('teacher-control-msg');
+
+            if (!micBtn || !videoBtn || !localStream) return;
+
+            // Handle Mic
+            if(controls.micMuted) {
+                localStream.getAudioTracks()[0].enabled = false;
+                micBtn.classList.add('muted');
+                micBtn.disabled = true;
+                controlMsg.textContent = "Teacher muted you.";
+                controlMsg.classList.remove('hidden');
+                controlMsg.classList.add('flex');
+            } else {
+                localStream.getAudioTracks()[0].enabled = true;
+                micBtn.classList.remove('muted');
+                micBtn.disabled = false;
+            }
+
+            // Handle Video
+            if(controls.videoOff) {
+                localStream.getVideoTracks()[0].enabled = false;
+                videoBtn.classList.remove('active');
+                videoBtn.disabled = true;
+                controlMsg.textContent = controls.micMuted ? "Mic & Video disabled" : "Teacher disabled your video.";
+                controlMsg.classList.remove('hidden');
+                controlMsg.classList.add('flex');
+            } else {
+                localStream.getVideoTracks()[0].enabled = true;
+                videoBtn.classList.add('active');
+                videoBtn.disabled = false;
+            }
+
+            if (!controls.micMuted && !controls.videoOff) {
+                controlMsg.classList.add('hidden');
+                controlMsg.classList.remove('flex');
+            }
         });
 
+
+        // Listener for class status
         const statusRef = db.ref(`liveClasses/${classId}/status`);
         addDBListener(statusRef, 'value', snap => {
             if (snap.val() === 'ended') {
@@ -400,24 +438,60 @@
             }
         });
         
-        document.getElementById('chat-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const input = document.getElementById('chat-input-field');
-            const text = input.value.trim();
-            if (text) {
-                db.ref(`liveClasses/${classId}/chat`).push({ senderId: student.id, senderName: student.studentName, text, timestamp: firebase.database.ServerValue.TIMESTAMP });
-                input.value = '';
-            }
-        });
-
         document.getElementById('mic-btn').addEventListener('click', (e) => {
             localStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
-            e.currentTarget.style.backgroundColor = localStream.getAudioTracks()[0].enabled ? 'rgba(255,255,255,0.2)' : '#f87171';
+            e.currentTarget.classList.toggle('active', localStream.getAudioTracks()[0].enabled);
+            e.currentTarget.classList.toggle('muted', !localStream.getAudioTracks()[0].enabled);
         });
         document.getElementById('video-btn').addEventListener('click', (e) => {
             localStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
-            e.currentTarget.style.backgroundColor = localStream.getVideoTracks()[0].enabled ? 'rgba(255,255,255,0.2)' : '#f87171';
+            e.currentTarget.classList.toggle('active', localStream.getVideoTracks()[0].enabled);
         });
+        document.getElementById('raise-hand-btn').addEventListener('click', (e) => {
+            const btn = e.currentTarget;
+            const handRaised = !btn.classList.contains('active');
+            db.ref(`liveClasses/${classId}/participants/${student.id}/handRaised`).set(handRaised);
+            btn.classList.toggle('active', handRaised);
+        });
+
+        // --- Screen Sharing Logic ---
+        let isScreenSharing = false;
+        let screenStream = null;
+        const myVideoEl = document.getElementById('my-video');
+        const cameraVideoTrack = localStream.getVideoTracks()[0];
+
+        const toggleScreenShare = async () => {
+            if (isScreenSharing) {
+                screenStream.getTracks().forEach(track => track.stop());
+                myVideoEl.srcObject = localStream;
+                myVideoEl.classList.toggle('-scale-x-100', true);
+                
+                const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+                if (sender) await sender.replaceTrack(cameraVideoTrack);
+                
+                isScreenSharing = false;
+                screenStream = null;
+                document.getElementById('screen-share-btn').classList.remove('active');
+            } else {
+                try {
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                    const screenTrack = screenStream.getVideoTracks()[0];
+                    myVideoEl.srcObject = screenStream;
+                    myVideoEl.classList.toggle('-scale-x-100', false);
+
+                    const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+                    if (sender) await sender.replaceTrack(screenTrack);
+                    
+                    screenTrack.onended = () => { if(isScreenSharing) toggleScreenShare(); };
+                    isScreenSharing = true;
+                    document.getElementById('screen-share-btn').classList.add('active');
+                } catch (err) {
+                    console.error("Screen share error:", err);
+                    showToast("Could not start screen sharing.");
+                }
+            }
+        };
+        document.getElementById('screen-share-btn').onclick = toggleScreenShare;
     }
 
     function renderAttendance() {
@@ -515,10 +589,120 @@
         });
     }
 
+    function renderLeaveApplication() {
+        const myLeaveApps = leaveApplications
+            .filter(app => app.studentId === student.id)
+            .sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated));
+        
+        const getStatusBadge = (status) => {
+            if (status === 'Approved') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approved</span>`;
+            if (status === 'Rejected') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>`;
+            return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>`;
+        };
+
+        const historyRows = myLeaveApps.map(app => `
+            <tr class="border-b">
+                <td class="p-3">${app.startDate} to ${app.endDate}</td>
+                <td class="p-3">${app.reason}</td>
+                <td class="p-3">${getStatusBadge(app.status)}</td>
+            </tr>
+        `).join('');
+
+        mainContent.innerHTML = `
+            <div class="space-y-6">
+                <div class="card">
+                    <h3 class="text-xl font-bold mb-4">Apply for Leave</h3>
+                    <form id="leave-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="leave-start-date" class="block text-sm font-medium text-gray-700">Start Date</label>
+                                <input type="date" id="leave-start-date" class="form-input mt-1" required>
+                            </div>
+                            <div>
+                                <label for="leave-end-date" class="block text-sm font-medium text-gray-700">End Date</label>
+                                <input type="date" id="leave-end-date" class="form-input mt-1" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="leave-reason" class="block text-sm font-medium text-gray-700">Reason for Leave</label>
+                            <textarea id="leave-reason" rows="3" class="form-textarea mt-1" required></textarea>
+                        </div>
+                        <div class="flex justify-end pt-2">
+                            <button type="submit" class="w-full md:w-auto py-2 px-6 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg">Submit Application</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="text-xl font-bold mb-4">My Leave History</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="p-3 text-left font-semibold text-gray-600">Dates</th>
+                                    <th class="p-3 text-left font-semibold text-gray-600">Reason</th>
+                                    <th class="p-3 text-left font-semibold text-gray-600">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${historyRows || `<tr><td colspan="3" class="text-center p-8 text-gray-500">You have not applied for any leave.</td></tr>`}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('leave-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            try {
+                const staffSnap = await db.ref('staff').once('value');
+                const allStaff = Object.values(staffSnap.val() || {});
+                const classTeacher = allStaff.find(s => s.assignedClass === student.className && s.assignedSection === student.section);
+
+                const leaveApp = {
+                    id: Date.now().toString(),
+                    studentId: student.id,
+                    studentName: student.studentName,
+                    className: student.className,
+                    section: student.section,
+                    startDate: document.getElementById('leave-start-date').value,
+                    endDate: document.getElementById('leave-end-date').value,
+                    reason: document.getElementById('leave-reason').value,
+                    status: 'Pending',
+                    applicantType: 'student',
+                    approverId: classTeacher ? classTeacher.id : 'admin',
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                if (new Date(leaveApp.endDate) < new Date(leaveApp.startDate)) {
+                    showToast("End date cannot be before start date.");
+                    return;
+                }
+
+                await db.ref('leaveApplications/' + leaveApp.id).set(leaveApp);
+                leaveApplications.push(leaveApp);
+                showToast("Leave application submitted successfully!");
+                renderLeaveApplication();
+            } catch (err) {
+                console.error("Leave submission error:", err);
+                showToast("Failed to submit application.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Application';
+            }
+        });
+    }
+
+
     // --- APP FLOW & NAVIGATION ---
     function setActiveTab(tabName) {
         cleanupDBListeners();
-        const pageTitles = { dashboard: 'Dashboard', 'id-card': 'My ID Card', homework: 'Homework', liveclass: 'Live Classes', attendance: 'My Attendance', results: 'My Results', diary: 'School Diary' };
+        const pageTitles = { dashboard: 'Dashboard', 'id-card': 'My ID Card', homework: 'Homework', liveclass: 'Live Classes', attendance: 'My Attendance', results: 'My Results', diary: 'School Diary', leave: 'Apply for Leave' };
         document.getElementById('page-title').textContent = pageTitles[tabName];
         
         // Sidebar
@@ -533,7 +717,7 @@
             b.classList.toggle('active', b.dataset.tab === tabName);
         });
 
-        const renderFunction = { dashboard: renderDashboard, 'id-card': renderMyIDCard, homework: renderHomework, liveclass: renderLiveClass, attendance: renderAttendance, results: renderResults, diary: renderDiary }[tabName];
+        const renderFunction = { dashboard: renderDashboard, 'id-card': renderMyIDCard, homework: renderHomework, liveclass: renderLiveClass, attendance: renderAttendance, results: renderResults, diary: renderDiary, leave: renderLeaveApplication }[tabName];
         if(renderFunction) renderFunction();
     }
 
@@ -567,12 +751,13 @@
             student = Object.values(studentsSnap.val() || {}).find(s => s.id === loggedInUser.id);
             if (!student) { logout(); throw new Error('Student profile not found.'); }
             
-            const [homeworkSnap, liveClassesSnap, attendanceSnap, resultsSnap, announcementsSnap] = await Promise.all([
+            const [homeworkSnap, liveClassesSnap, attendanceSnap, resultsSnap, announcementsSnap, leaveAppsSnap] = await Promise.all([
                 db.ref('homework').orderByChild('className').equalTo(student.className).once('value'),
                 db.ref('liveClasses').orderByChild('className').equalTo(student.className).once('value'),
                 db.ref('attendance').orderByChild('className').equalTo(student.className).once('value'),
                 db.ref('results').orderByChild('className').equalTo(student.className).once('value'),
-                db.ref('announcements').once('value')
+                db.ref('announcements').once('value'),
+                db.ref('leaveApplications').orderByChild('studentId').equalTo(student.id).once('value')
             ]);
             
             const filterBySection = (snap) => Object.values(snap.val() || {}).filter(item => item.section === student.section);
@@ -582,6 +767,7 @@
             attendanceRecords = filterBySection(attendanceSnap);
             results = filterBySection(resultsSnap);
             announcements = Object.values(announcementsSnap.val() || {});
+            leaveApplications = Object.values(leaveAppsSnap.val() || {});
 
             document.getElementById('student-info').innerHTML = `<p class="font-semibold">${student.studentName}</p><p class="text-sm text-gray-500">Class ${student.className}-${student.section}</p>`;
             document.getElementById('logout-btn').addEventListener('click', logout);
@@ -650,5 +836,6 @@
 
 </script>
 <script type="module" src="/index.tsx"></script>
+
 
 <script src="./script.js"></script></body></html>
