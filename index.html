@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en" class=""><head><script>window.livecodes = window.livecodes || {};</script><title>School students </title><meta name="title" content="School students "><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="./style.css"><script src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js" async=""></script><script type="importmap">{
+  "imports": {}
+}</script></head><body>
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - Navrose Smart School</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        :root {
+            --bg-primary: #f7f8fa;
+            --bg-secondary: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --accent-primary: #16a34a;
+            --accent-hover: #15803d;
+            --border-color: #e5e7eb;
+        }
+        html, body { height: 100%; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-primary); }
+        .card { 
+            background-color: var(--bg-secondary); border-radius: 1rem; padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.05);
+        }
+        .form-input {
+            width: 100%; padding: 0.75rem; border: 1px solid var(--border-color);
+            border-radius: 0.5rem; font-size: 1rem; background-color: var(--bg-secondary);
+        }
+        .tab-button.active { background-color: var(--accent-primary); color: white; }
+
+        /* Live Class View */
+        .classroom-container { display: flex; height: calc(100vh - 10rem); gap: 1rem; }
+        .main-video-area { flex-grow: 1; background-color: #000; border-radius: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+        .main-video-area .teacher-placeholder { color: white; text-align: center; }
+        .main-video-area .my-video-container { position: absolute; bottom: 1rem; right: 1rem; width: 200px; height: 150px; border: 2px solid white; border-radius: 0.5rem; overflow: hidden; }
+        .main-video-area video { width: 100%; height: 100%; object-fit: cover; }
+        .classroom-sidebar { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; gap: 1rem; }
+        .chat-panel { background-color: var(--bg-secondary); border-radius: 1rem; border: 1px solid var(--border-color); display: flex; flex-direction: column; flex-grow: 1; }
+        .panel-header { padding: 0.75rem 1rem; font-weight: 700; border-bottom: 1px solid var(--border-color); }
+        .panel-body { padding: 1rem; overflow-y: auto; flex-grow: 1; }
+        .chat-messages { display: flex; flex-direction: column; gap: 0.75rem; }
+        .chat-message { padding: 0.5rem 0.75rem; border-radius: 0.5rem; max-width: 80%; word-break: break-word; }
+        .chat-message.self { background-color: var(--accent-primary); color: white; align-self: flex-end; }
+        .chat-message.other { background-color: #f3f4f6; align-self: flex-start; }
+        .chat-input { border-top: 1px solid var(--border-color); padding: 0.75rem; display: flex; gap: 0.5rem; }
+        .video-controls { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); background-color: rgba(0,0,0,0.5); padding: 0.75rem 1.5rem; border-radius: 9999px; display: flex; gap: 1rem; z-index: 10;}
+        .control-btn { width: 48px; height: 48px; border-radius: 50%; background-color: rgba(255,255,255,0.2); color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; transition: background-color 0.2s; }
+        .control-btn:hover { background-color: rgba(255,255,255,0.3); }
+        .control-btn.danger { background-color: #ef4444; }
+        .control-btn.danger:hover { background-color: #dc2626; }
+    </style>
+<link rel="stylesheet" href="/index.css">
+
+
+
+    <div id="login-overlay" class="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center hidden">
+        <div class="w-full max-w-sm p-8 space-y-6 bg-white rounded-2xl shadow-lg">
+            <div class="text-center">
+                <h1 class="text-2xl font-bold">Student Portal Login</h1>
+                <p class="text-gray-500">Welcome back!</p>
+            </div>
+            <form id="student-login-form" class="space-y-4">
+                <div>
+                    <label for="student-admission-no" class="block text-sm font-medium text-gray-700">Admission No.</label>
+                    <input type="text" id="student-admission-no" class="form-input mt-1" required="">
+                </div>
+                <div>
+                    <label for="student-mobile" class="block text-sm font-medium text-gray-700">Registered Mobile No.</label>
+                    <input type="tel" id="student-mobile" class="form-input mt-1" required="">
+                </div>
+                <div class="pt-2">
+                     <button type="submit" class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <nav class="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0 hidden">
+        <div class="p-4 border-b flex items-center gap-3">
+            <div class="bg-green-600 p-2 rounded-lg text-white">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M10.5 4.5a3 3 0 0 0-3 3v.75a.75.75 0 0 1-1.5 0v-.75a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5v.75a.75.75 0 0 1-1.5 0v-.75a3 3 0 0 0-3-3h-3Z"></path><path fill-rule="evenodd" d="M2.25 12c0-3.573 2.642-6.535 6.07-7.122A.75.75 0 0 1 9 5.628v12.744a.75.75 0 0 1-1.192.594C4.354 18.2 2.25 15.34 2.25 12ZM15 5.628a.75.75 0 0 0-1.192-.594C17.646 5.7 21.75 8.66 21.75 12c0 3.573-2.642 6.535-6.07 7.122A.75.75 0 0 0 15 18.372V5.628Z" clip-rule="evenodd"></path></svg>
+            </div>
+            <h1 class="text-xl font-bold">Student Portal</h1>
+        </div>
+        <div class="flex-grow p-4 space-y-2">
+            <button data-tab="dashboard" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button active">Dashboard</button>
+            <button data-tab="id-card" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">My ID Card</button>
+            <button data-tab="homework" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">Homework</button>
+            <button data-tab="liveclass" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">Live Classes</button>
+            <button data-tab="attendance" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">My Attendance</button>
+            <button data-tab="results" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">My Results</button>
+            <button data-tab="diary" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">School Diary</button>
+        </div>
+        <div class="p-4 border-t">
+            <button id="logout-btn" class="w-full text-left p-3 rounded-lg font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M7.5 3.75A1.5 1.5 0 0 0 6 5.25v13.5a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5V15a.75.75 0 0 1 1.5 0v3.75a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3V5.25a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3V9A.75.75 0 0 1 15 9V5.25a1.5 1.5 0 0 0-1.5-1.5h-6Zm10.72 4.72a.75.75 0 0 1 1.06 0l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H9a.75.75 0 0 1 0-1.5h10.94l-1.72-1.72a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path></svg>
+                Logout
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-1 p-8 overflow-y-auto hidden">
+        <header class="flex justify-between items-center mb-8">
+            <h2 id="page-title" class="text-3xl font-bold">Dashboard</h2>
+            <div id="student-info" class="text-right"></div>
+        </header>
+        <div id="app-content-container"></div>
+    </main>
+    <div id="toast" style="position: fixed; bottom: 1.5rem; right: 1.5rem; background-color: #1f2937; color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; z-index: 1200; opacity: 0; transition: opacity .3s ease, transform .3s ease; transform: translateY(20px);"></div>
+
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD7gB7FbMFtG1k1vJGVI3XVCyCUNeZIC7M",
+        databaseURL: "https://smart-school-e9f86-default-rtdb.asia-southeast1.firebasedatabase.app",
+    };
+
+    // --- APP STATE (GLOBAL) ---
+    let db;
+    let student = null;
+    let homework = [];
+    let liveClasses = [];
+    let attendanceRecords = [];
+    let results = [];
+    let announcements = [];
+    let localStream = null;
+    let activeDBListeners = [];
+    const mainContent = document.getElementById('app-content-container');
+
+    // --- UTILITIES ---
+    function showToast(message) {
+        const t = document.getElementById('toast');
+        if(!t) return;
+        t.textContent = message; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+    function logout() {
+        sessionStorage.removeItem('loggedInUser');
+        student = null; homework = []; liveClasses = []; attendanceRecords = []; results = []; announcements = [];
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+        cleanupDBListeners();
+        document.querySelector('nav').classList.add('hidden');
+        document.querySelector('main').classList.add('hidden');
+        showLogin();
+    }
+    function cleanupDBListeners() {
+        activeDBListeners.forEach(l => l.ref.off(l.type, l.callback));
+        activeDBListeners = [];
+    }
+    function addDBListener(ref, type, callback) {
+        ref.on(type, callback);
+        activeDBListeners.push({ ref, type, callback });
+    }
+
+    // --- RENDER FUNCTIONS ---
+    function renderDashboard() {
+        const upcomingHomeworkCount = homework.filter(h => new Date(h.dueDate) >= new Date()).length;
+        const totalRecords = attendanceRecords.filter(r => r.attendance && r.attendance[student.id]).length;
+        const presentRecords = attendanceRecords.filter(r => r.attendance && r.attendance[student.id] === 'Present').length;
+        const attendancePercent = totalRecords > 0 ? ((presentRecords / totalRecords) * 100).toFixed(0) : 100;
+        const latestAnnouncement = announcements.sort((a,b) => new Date(b.date) - new Date(a.date))[0];
+
+        mainContent.innerHTML = `
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-2xl font-bold">Welcome, ${student.studentName}!</h3>
+                    <p class="text-gray-600 mt-1">Class: <strong>${student.className} - ${student.section}</strong> | Adm No: <strong>${student.admissionNumber}</strong></p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card"><h3 class="font-semibold text-gray-500">Upcoming Homework</h3><p class="text-4xl font-extrabold mt-2">${upcomingHomeworkCount}</p></div>
+                    <div class="card"><h3 class="font-semibold text-gray-500">Overall Attendance</h3><p class="text-4xl font-extrabold text-green-600 mt-2">${attendancePercent}%</p></div>
+                    <div class="card"><h3 class="font-semibold text-gray-500">Recent Grade</h3><p class="text-4xl font-extrabold mt-2">A+</p></div>
+                </div>
+                ${latestAnnouncement ? `
+                <div class="card bg-gray-50">
+                    <h4 class="font-bold text-lg mb-2">Latest Announcement</h4>
+                    <div class="border-l-4 border-green-500 pl-4">
+                        <h5 class="font-bold">${latestAnnouncement.title}</h5>
+                        <p class="text-gray-700">${latestAnnouncement.message.substring(0, 150)}...</p>
+                    </div>
+                </div>` : ''}
+            </div>
+        `;
+    }
+
+    function renderHomework() {
+        const sortedHomework = [...homework].sort((a,b) => new Date(b.date) - new Date(a.date));
+        mainContent.innerHTML = `<div class="space-y-4">${sortedHomework.map(h => `<div class="card"><h4 class="font-bold text-lg">${h.title} <span class="text-sm font-normal text-gray-500">(${h.subject})</span></h4><p class="text-sm text-gray-500">Assigned: ${new Date(h.date).toLocaleDateString()} | Due: ${h.dueDate}</p><p class="mt-2 whitespace-pre-wrap">${h.description}</p></div>`).join('') || '<div class="card text-center text-gray-500 py-8">No homework found.</div>'}</div>`;
+    }
+    
+    function renderLiveClass() {
+        mainContent.innerHTML = `<div id="live-class-list" class="space-y-4"></div>`;
+        const container = document.getElementById('live-class-list');
+
+        const liveClassesRef = db.ref('liveClasses');
+        addDBListener(liveClassesRef, 'value', (snapshot) => {
+            const allClasses = Object.values(snapshot.val() || {});
+            const myClasses = allClasses
+                .filter(lc => lc.className === student.className && lc.section === student.section)
+                .sort((a, b) => new Date(b.date + ' ' + b.startTime) - new Date(a.date + ' ' + a.startTime));
+
+            if (!container) return; 
+
+            const getStatusBadge = (status) => {
+                if (status === 'live') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Live</span>`;
+                if (status === 'ended') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Ended</span>`;
+                return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Scheduled</span>`;
+            };
+
+            container.innerHTML = myClasses.length > 0 ? myClasses.map(lc => {
+                const canJoin = lc.status === 'live';
+                return `
+                <div class="card">
+                     <div class="flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-lg">${lc.topic} <span class="text-base font-medium text-gray-500">(${lc.subject})</span></h4>
+                            <p class="text-sm text-gray-500">By ${lc.teacherName} | On: ${lc.date} at ${lc.startTime}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            ${getStatusBadge(lc.status)}
+                            <button onclick="joinLiveClass('${lc.id}')" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400" ${!canJoin ? 'disabled' : ''}>Join Class</button>
+                        </div>
+                    </div>
+                </div>`
+            }).join('') : '<div class="card text-center text-gray-500 py-8">No live classes scheduled for you.</div>';
+        });
+    }
+
+    async function joinLiveClass(classId) {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            const studentParticipant = { id: student.id, name: student.studentName };
+            await db.ref(`liveClasses/${classId}/participants/${student.id}`).set(studentParticipant);
+            renderStudentClassroomView(classId);
+        } catch(err) {
+            console.error("Error joining class:", err);
+            showToast("Could not access camera/microphone. Please check permissions.");
+        }
+    }
+
+    async function leaveLiveClass(classId) {
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+        await db.ref(`liveClasses/${classId}/participants/${student.id}`).remove();
+        cleanupDBListeners();
+        setActiveTab('liveclass');
+    }
+
+    function renderStudentClassroomView(classId) {
+        document.querySelector('nav').classList.add('hidden');
+        document.querySelector('main header').classList.add('hidden');
+        
+        mainContent.innerHTML = `
+            <div class="classroom-container">
+                <div class="main-video-area">
+                    <div class="teacher-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-24 h-24 text-gray-700"><path d="M11.7 2.81a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l3.18 3.18a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-3.18 3.18a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0L8.81 16.2a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l3.18-3.18ZM12 5.44 9.17 8.27l1.06 1.06a.75.75 0 0 1-1.06 1.06l-1.06-1.06L5.44 12l2.83 2.83 1.06-1.06a.75.75 0 0 1 1.06 1.06l-1.06 1.06L12 18.56l2.83-2.83-1.06-1.06a.75.75 0 0 1 1.06-1.06l1.06 1.06L18.56 12l-2.83-2.83-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06L12 5.44Z" /></svg>
+                        <h3 class="text-xl font-bold mt-4">Waiting for teacher's video...</h3>
+                        <p class="text-gray-400">The class is live.</p>
+                    </div>
+                    <div class="my-video-container">
+                         <video id="my-video" autoplay playsinline muted class="transform -scale-x-100"></video>
+                    </div>
+                    <div class="video-controls">
+                        <button id="mic-btn" class="control-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M8.25 4.5a3.75 3.75 0 1 1 7.5 0v8.25a3.75 3.75 0 1 1-7.5 0V4.5Z" /><path d="M6 15a.75.75 0 0 1 .75.75v.008c0 3.036 2.464 5.5 5.5 5.5s5.5-2.464 5.5-5.5v-.008a.75.75 0 0 1 1.5 0v.008a7 7 0 0 1-7 7s-7-3.134-7-7v-.008A.75.75 0 0 1 6 15Z" /></svg></button>
+                        <button id="video-btn" class="control-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-2.845l3.52 1.87a.75.75 0 0 0 1.23-.654V8.13a.75.75 0 0 0-1.23-.655L15.75 9.345V7.5a3 3 0 0 0-3-3H4.5Z" /></svg></button>
+                        <button id="leave-class-btn" class="control-btn danger"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M10.25 5.25a.75.75 0 0 0-1.5 0v4.32L6.873 7.72a.75.75 0 0 0-1.054 1.07l1.9 1.85-1.9 1.85a.75.75 0 1 0 1.054 1.07L8.75 11.68v4.57a.75.75 0 0 0 1.5 0v-4.57l1.877 1.82a.75.75 0 1 0 1.054-1.07l-1.9-1.85 1.9-1.85a.75.75 0 0 0-1.054-1.07L10.25 9.57V5.25Z" /><path fill-rule="evenodd" d="M3.75 2.25a.75.75 0 0 0-.75.75v18c0 .414.336.75.75.75h16.5a.75.75 0 0 0 .75-.75V3a.75.75 0 0 0-.75-.75H3.75ZM5.25 3.75h13.5v16.5H5.25V3.75Z" clip-rule="evenodd" /></svg></button>
+                    </div>
+                </div>
+                <div class="classroom-sidebar">
+                    <div class="chat-panel">
+                        <div class="panel-header">Chat</div>
+                        <div id="chat-messages" class="panel-body chat-messages"></div>
+                        <form id="chat-form" class="chat-input"><input type="text" id="chat-input-field" class="form-input" placeholder="Type a message..." required><button type="submit" class="bg-green-600 text-white p-2 rounded-lg">Send</button></form>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('my-video').srcObject = localStream;
+        document.getElementById('leave-class-btn').onclick = () => leaveLiveClass(classId);
+        
+        cleanupDBListeners();
+
+        const chatRef = db.ref(`liveClasses/${classId}/chat`);
+        addDBListener(chatRef, 'child_added', snap => {
+            const msg = snap.val();
+            const chatBox = document.getElementById('chat-messages');
+            if (!chatBox) return;
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('chat-message', msg.senderId === student.id ? 'self' : 'other');
+            msgDiv.innerHTML = `<div class="font-bold text-sm">${msg.senderName}</div><div>${msg.text}</div>`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        const statusRef = db.ref(`liveClasses/${classId}/status`);
+        addDBListener(statusRef, 'value', snap => {
+            if (snap.val() === 'ended') {
+                showToast("The teacher has ended the class.");
+                leaveLiveClass(classId);
+            }
+        });
+        
+        document.getElementById('chat-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chat-input-field');
+            const text = input.value.trim();
+            if (text) {
+                db.ref(`liveClasses/${classId}/chat`).push({ senderId: student.id, senderName: student.studentName, text, timestamp: firebase.database.ServerValue.TIMESTAMP });
+                input.value = '';
+            }
+        });
+
+        document.getElementById('mic-btn').addEventListener('click', (e) => {
+            localStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+            e.currentTarget.style.backgroundColor = localStream.getAudioTracks()[0].enabled ? 'rgba(255,255,255,0.2)' : '#f87171';
+        });
+        document.getElementById('video-btn').addEventListener('click', (e) => {
+            localStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+            e.currentTarget.style.backgroundColor = localStream.getVideoTracks()[0].enabled ? 'rgba(255,255,255,0.2)' : '#f87171';
+        });
+    }
+
+    function renderAttendance() {
+        const today = new Date();
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+        
+        mainContent.innerHTML = `
+            <div class="card">
+                 <div id="calendar-header" class="flex justify-between items-center mb-4">
+                    <button id="prev-month" class="p-2 rounded-full hover:bg-gray-100">&lt;</button>
+                    <h3 id="month-year" class="text-xl font-bold"></h3>
+                    <button id="next-month" class="p-2 rounded-full hover:bg-gray-100">&gt;</button>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
+                <div class="flex justify-center gap-4 mt-4 text-sm"><span class="flex items-center gap-2"><div class="w-3 h-3 bg-green-200 rounded-full"></div>Present</span><span class="flex items-center gap-2"><div class="w-3 h-3 bg-red-200 rounded-full"></div>Absent</span><span class="flex items-center gap-2"><div class="w-3 h-3 bg-yellow-200 rounded-full"></div>Leave</span></div>
+            </div>
+        `;
+
+        const updateCalendar = () => generateCalendar(currentYear, currentMonth);
+
+        document.getElementById('prev-month').addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            updateCalendar();
+        });
+        document.getElementById('next-month').addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            updateCalendar();
+        });
+
+        updateCalendar();
+    }
+
+    function generateCalendar(year, month) {
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        document.getElementById('month-year').textContent = `${monthNames[month]} ${year}`;
+        
+        const grid = document.getElementById('calendar-grid');
+        grid.innerHTML = '';
+        
+        ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(day => {
+            grid.innerHTML += `<div class="font-semibold text-sm text-gray-500 p-2">${day}</div>`;
+        });
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) {
+            grid.innerHTML += '<div></div>';
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const record = attendanceRecords.find(r => r.date === dateStr);
+            const status = record?.attendance?.[student.id];
+            
+            let statusClass = 'bg-gray-100';
+            if(status === 'Present') statusClass = 'bg-green-200';
+            else if(status === 'Absent') statusClass = 'bg-red-200';
+            else if(status === 'Leave') statusClass = 'bg-yellow-200';
+            
+            grid.innerHTML += `<div class="p-2 rounded-full ${statusClass}">${day}</div>`;
+        }
+    }
+
+    function renderResults() {
+        mainContent.innerHTML = `<div class="space-y-4">${results.map(res => `<div class="card"><h4 class="font-bold text-lg">${res.examType}</h4><div class="overflow-x-auto mt-2"><table class="w-full text-sm"><thead><tr class="border-b"><th class="p-2 text-left">Subject</th><th class="p-2 text-right">Marks (100)</th></tr></thead><tbody>${Object.entries(res.results[student.id] || {}).map(([sub, marks]) => `<tr><td class="p-2">${sub}</td><td class="p-2 text-right font-semibold">${marks}</td></tr>`).join('')}</tbody></table></div></div>`).join('') || '<div class="card text-center text-gray-500 py-8">No results have been published yet.</div>'}</div>`;
+    }
+
+    function renderDiary() {
+        const sortedAnnouncements = [...announcements].sort((a,b) => new Date(b.date) - new Date(a.date));
+        mainContent.innerHTML = `<div class="space-y-4">${sortedAnnouncements.map(a => `<div class="card"><h4 class="font-bold text-lg">${a.title}</h4><p class="text-sm text-gray-500">Posted on: ${new Date(a.date).toLocaleDateString()}</p><p class="mt-2 whitespace-pre-wrap">${a.message}</p></div>`).join('') || '<div class="card text-center text-gray-500 py-8">No announcements found.</div>'}</div>`;
+    }
+
+    function renderMyIDCard() {
+        mainContent.innerHTML = `
+            <div class="max-w-md mx-auto card text-center">
+                 <h3 class="text-2xl font-bold">${student.studentName}</h3>
+                 <p class="text-gray-600">Class: ${student.className} - ${student.section}</p>
+                 <p class="text-gray-600 mb-6">Admission No: ${student.admissionNumber}</p>
+                 <div id="qrcode" class="flex justify-center p-4 bg-white border rounded-lg"></div>
+                 <p class="mt-4 text-sm text-gray-500">Show this QR code to your teacher for attendance.</p>
+            </div>
+        `;
+
+        new QRCode(document.getElementById("qrcode"), {
+            text: student.id,
+            width: 256,
+            height: 256,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+    }
+
+    // --- APP FLOW & NAVIGATION ---
+    function setActiveTab(tabName) {
+        document.querySelector('nav').classList.remove('hidden');
+        document.querySelector('main header').classList.remove('hidden');
+        cleanupDBListeners();
+
+        const pageTitles = { dashboard: 'Dashboard', 'id-card': 'My ID Card', homework: 'Homework', liveclass: 'Live Classes', attendance: 'My Attendance', results: 'My Results', diary: 'School Diary' };
+        document.getElementById('page-title').textContent = pageTitles[tabName];
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+        const renderFunction = { dashboard: renderDashboard, 'id-card': renderMyIDCard, homework: renderHomework, liveclass: renderLiveClass, attendance: renderAttendance, results: renderResults, diary: renderDiary }[tabName];
+        if(renderFunction) renderFunction();
+    }
+    
+    async function runApp(loggedInUser) {
+        document.getElementById('login-overlay').classList.add('hidden');
+        document.querySelector('nav').classList.remove('hidden');
+        document.querySelector('main').classList.remove('hidden');
+        mainContent.innerHTML = `<div class="text-center p-8"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div><p class="mt-4 text-gray-600">Loading your data...</p></div>`;
+        
+        try {
+            const studentsSnap = await db.ref('students').once('value');
+            student = Object.values(studentsSnap.val() || {}).find(s => s.id === loggedInUser.id);
+            if (!student) { logout(); throw new Error('Student profile not found.'); }
+            
+            const [homeworkSnap, liveClassesSnap, attendanceSnap, resultsSnap, announcementsSnap] = await Promise.all([
+                db.ref('homework').orderByChild('className').equalTo(student.className).once('value'),
+                db.ref('liveClasses').orderByChild('className').equalTo(student.className).once('value'),
+                db.ref('attendance').orderByChild('className').equalTo(student.className).once('value'),
+                db.ref('results').orderByChild('className').equalTo(student.className).once('value'),
+                db.ref('announcements').once('value')
+            ]);
+            
+            const filterBySection = (snap) => Object.values(snap.val() || {}).filter(item => item.section === student.section);
+            
+            homework = filterBySection(homeworkSnap);
+            liveClasses = filterBySection(liveClassesSnap);
+            attendanceRecords = filterBySection(attendanceSnap);
+            results = filterBySection(resultsSnap);
+            announcements = Object.values(announcementsSnap.val() || {});
+
+            document.getElementById('student-info').innerHTML = `<p class="font-semibold">${student.studentName}</p><p class="text-sm text-gray-500">Class ${student.className}-${student.section}</p>`;
+            document.querySelectorAll('.tab-button').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            setActiveTab('dashboard');
+
+        } catch (error) {
+            console.error("Failed to load student data:", error);
+            mainContent.innerHTML = `<div class="card text-red-700 bg-red-100"><h3 class="font-bold">Error</h3><p>Could not load your data. Please log out and try again.</p></div>`;
+        }
+    }
+
+    function showLogin() {
+        document.getElementById('login-overlay').classList.remove('hidden');
+    }
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+
+        const form = document.getElementById('student-login-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const admissionNo = document.getElementById('student-admission-no').value;
+            const mobile = document.getElementById('student-mobile').value;
+            const button = form.querySelector('button[type="submit"]');
+            button.disabled = true;
+            button.textContent = 'Verifying...';
+            
+            try {
+                const studentsSnap = await db.ref('students').once('value');
+                const allStudents = Object.values(studentsSnap.val() || {});
+                const foundStudent = allStudents.find(s => s.admissionNumber === admissionNo && s.mobile === mobile);
+                
+                if (foundStudent) {
+                    const user = { role: 'student', id: foundStudent.id };
+                    sessionStorage.setItem('loggedInUser', JSON.stringify(user));
+                    runApp(user);
+                } else {
+                    showToast('Invalid Admission No. or Mobile No.');
+                }
+            } catch (err) {
+                showToast('Login failed. Check connection.');
+                console.error(err);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Login';
+            }
+        });
+        
+        let loggedInUser = null;
+        try {
+            const userData = sessionStorage.getItem('loggedInUser');
+            if (userData) loggedInUser = JSON.parse(userData);
+        } catch (e) {
+            sessionStorage.removeItem('loggedInUser');
+        }
+        
+        if (loggedInUser && loggedInUser.role === 'student') {
+            runApp(loggedInUser);
+        } else {
+            showLogin();
+        }
+    });
+
+</script>
+<script type="module" src="/index.tsx"></script>
+
+<script src="./script.js"></script></body></html>
