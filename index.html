@@ -25,7 +25,7 @@
             --accent-hover: #15803d;
             --border-color: #e5e7eb;
         }
-        html, body { height: 100%; }
+        html, body { height: 100%; overflow: hidden; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-primary); }
         .card { 
             background-color: var(--bg-secondary); border-radius: 1rem; padding: 1.5rem;
@@ -36,24 +36,28 @@
             width: 100%; padding: 0.75rem; border: 1px solid var(--border-color);
             border-radius: 0.5rem; font-size: 1rem; background-color: var(--bg-secondary);
         }
-        .tab-button.active { background-color: var(--accent-primary); color: white; }
+        
+        /* New Responsive Layout */
+        .sidebar { transition: width 0.3s ease; }
+        .sidebar.collapsed { width: 5rem; }
+        .sidebar.collapsed .sidebar-header-text, .sidebar.collapsed .nav-text { display: none; }
+        .sidebar.collapsed .nav-button { justify-content: center; }
+
+        #bottom-nav { border-top: 1px solid var(--border-color); }
+        .bottom-nav-btn { color: var(--text-secondary); }
+        .bottom-nav-btn.active { color: var(--accent-primary); }
+
+        @media (max-width: 767px) {
+            .sidebar { display: none; }
+            #bottom-nav { display: flex; }
+            main { padding-bottom: 5rem; } /* Space for bottom nav */
+        }
+        @media (min-width: 768px) {
+            #menu-toggle { display: block; }
+            #bottom-nav { display: none; }
+        }
 
         /* Live Class View */
-        .classroom-container { display: flex; height: calc(100vh - 10rem); gap: 1rem; }
-        .main-video-area { flex-grow: 1; background-color: #000; border-radius: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; }
-        .main-video-area .teacher-placeholder { color: white; text-align: center; }
-        .main-video-area .my-video-container { position: absolute; bottom: 1rem; right: 1rem; width: 200px; height: 150px; border: 2px solid white; border-radius: 0.5rem; overflow: hidden; }
-        .main-video-area video { width: 100%; height: 100%; object-fit: cover; }
-        .classroom-sidebar { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; gap: 1rem; }
-        .chat-panel { background-color: var(--bg-secondary); border-radius: 1rem; border: 1px solid var(--border-color); display: flex; flex-direction: column; flex-grow: 1; }
-        .panel-header { padding: 0.75rem 1rem; font-weight: 700; border-bottom: 1px solid var(--border-color); }
-        .panel-body { padding: 1rem; overflow-y: auto; flex-grow: 1; }
-        .chat-messages { display: flex; flex-direction: column; gap: 0.75rem; }
-        .chat-message { padding: 0.5rem 0.75rem; border-radius: 0.5rem; max-width: 80%; word-break: break-word; }
-        .chat-message.self { background-color: var(--accent-primary); color: white; align-self: flex-end; }
-        .chat-message.other { background-color: #f3f4f6; align-self: flex-start; }
-        .chat-input { border-top: 1px solid var(--border-color); padding: 0.75rem; display: flex; gap: 0.5rem; }
-        .video-controls { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); background-color: rgba(0,0,0,0.5); padding: 0.75rem 1.5rem; border-radius: 9999px; display: flex; gap: 1rem; z-index: 10;}
         .control-btn { width: 48px; height: 48px; border-radius: 50%; background-color: rgba(255,255,255,0.2); color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; transition: background-color 0.2s; }
         .control-btn:hover { background-color: rgba(255,255,255,0.3); }
         .control-btn.danger { background-color: #ef4444; }
@@ -63,7 +67,7 @@
 
 
 
-    <div id="login-overlay" class="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center hidden">
+    <div id="login-overlay" class="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
         <div class="w-full max-w-sm p-8 space-y-6 bg-white rounded-2xl shadow-lg">
             <div class="text-center">
                 <h1 class="text-2xl font-bold">Student Portal Login</h1>
@@ -85,38 +89,56 @@
         </div>
     </div>
 
-
-    <nav class="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0 hidden">
-        <div class="p-4 border-b flex items-center gap-3">
-            <div class="bg-green-600 p-2 rounded-lg text-white">
-                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M10.5 4.5a3 3 0 0 0-3 3v.75a.75.75 0 0 1-1.5 0v-.75a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5v.75a.75.75 0 0 1-1.5 0v-.75a3 3 0 0 0-3-3h-3Z"></path><path fill-rule="evenodd" d="M2.25 12c0-3.573 2.642-6.535 6.07-7.122A.75.75 0 0 1 9 5.628v12.744a.75.75 0 0 1-1.192.594C4.354 18.2 2.25 15.34 2.25 12ZM15 5.628a.75.75 0 0 0-1.192-.594C17.646 5.7 21.75 8.66 21.75 12c0 3.573-2.642 6.535-6.07 7.122A.75.75 0 0 0 15 18.372V5.628Z" clip-rule="evenodd"></path></svg>
+    <div id="app-container" class="flex h-screen hidden">
+        <nav class="sidebar w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+            <div class="p-4 border-b flex items-center gap-3">
+                <div class="bg-green-600 p-2 rounded-lg text-white">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M10.5 4.5a3 3 0 0 0-3 3v.75a.75.75 0 0 1-1.5 0v-.75a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5v.75a.75.75 0 0 1-1.5 0v-.75a3 3 0 0 0-3-3h-3Z"></path><path fill-rule="evenodd" d="M2.25 12c0-3.573 2.642-6.535 6.07-7.122A.75.75 0 0 1 9 5.628v12.744a.75.75 0 0 1-1.192.594C4.354 18.2 2.25 15.34 2.25 12ZM15 5.628a.75.75 0 0 0-1.192-.594C17.646 5.7 21.75 8.66 21.75 12c0 3.573-2.642 6.535-6.07 7.122A.75.75 0 0 0 15 18.372V5.628Z" clip-rule="evenodd"></path></svg>
+                </div>
+                <h1 class="text-xl font-bold sidebar-header-text">Student Portal</h1>
             </div>
-            <h1 class="text-xl font-bold">Student Portal</h1>
-        </div>
-        <div class="flex-grow p-4 space-y-2">
-            <button data-tab="dashboard" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button active">Dashboard</button>
-            <button data-tab="id-card" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">My ID Card</button>
-            <button data-tab="homework" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">Homework</button>
-            <button data-tab="liveclass" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">Live Classes</button>
-            <button data-tab="attendance" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">My Attendance</button>
-            <button data-tab="results" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">My Results</button>
-            <button data-tab="diary" class="w-full text-left p-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 tab-button">School Diary</button>
-        </div>
-        <div class="p-4 border-t">
-            <button id="logout-btn" class="w-full text-left p-3 rounded-lg font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M7.5 3.75A1.5 1.5 0 0 0 6 5.25v13.5a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5V15a.75.75 0 0 1 1.5 0v3.75a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3V5.25a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3V9A.75.75 0 0 1 15 9V5.25a1.5 1.5 0 0 0-1.5-1.5h-6Zm10.72 4.72a.75.75 0 0 1 1.06 0l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H9a.75.75 0 0 1 0-1.5h10.94l-1.72-1.72a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path></svg>
-                Logout
-            </button>
-        </div>
-    </nav>
+            <div class="flex-grow p-2 space-y-1">
+                <button data-tab="dashboard" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 4.5a3 3 0 0 0-3 3v.75a.75.75 0 0 1-1.5 0v-.75a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5v.75a.75.75 0 0 1-1.5 0v-.75a3 3 0 0 0-3-3h-3Z"></path><path fill-rule="evenodd" d="M2.25 12c0-3.573 2.642-6.535 6.07-7.122A.75.75 0 0 1 9 5.628v12.744a.75.75 0 0 1-1.192.594C4.354 18.2 2.25 15.34 2.25 12ZM15 5.628a.75.75 0 0 0-1.192-.594C17.646 5.7 21.75 8.66 21.75 12c0 3.573-2.642 6.535-6.07 7.122A.75.75 0 0 0 15 18.372V5.628Z" clip-rule="evenodd"></path></svg> <span class="nav-text">Dashboard</span></button>
+                <button data-tab="id-card" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"></path><path fill-rule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v14.25c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 19.125V4.875ZM3 16.5c0 .207.168.375.375.375h17.25a.375.375 0 0 0 .375-.375V9.75A.75.75 0 0 0 20.25 9h-1.355a3 3 0 0 1-2.91-2.583A6 6 0 0 0 12 3.75c-1.61 0-3.094.633-4.186 1.667A3.001 3.001 0 0 1 4.905 9H3.75a.75.75 0 0 0-.75.75v6.75Z" clip-rule="evenodd"></path></svg> <span class="nav-text">My ID Card</span></button>
+                <button data-tab="homework" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.25 4.533A9.708 9.708 0 0 0 6 3.75a9.708 9.708 0 0 0-5.25.783V18a9.708 9.708 0 0 0 5.25.783a9.708 9.708 0 0 0 5.25-.783V4.533Z"></path><path d="M12.75 3.75a9.708 9.708 0 0 1 5.25.783V18a9.708 9.708 0 0 1-5.25.783a9.708 9.708 0 0 1-5.25-.783V4.533c.359-.092.73-.162 1.114-.211A9.73 9.73 0 0 1 8.25 3.75a9.73 9.73 0 0 1 4.5 0Z"></path></svg> <span class="nav-text">Homework</span></button>
+                <button data-tab="liveclass" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3h-15Zm-1.5 3a1.5 1.5 0 0 1 1.5-1.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5-1.5h-15a1.5 1.5 0 0 1-1.5-1.5v-9Z"></path><path d="M10.03 10.03a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-.75-.75a.75.75 0 1 1 1.06-1.06l.22.22 1.72-1.72a.75.75 0 0 1 1.06 0Zm6-2.25a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75Z"></path></svg> <span class="nav-text">Live Classes</span></button>
+                <button data-tab="attendance" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clip-rule="evenodd"></path></svg> <span class="nav-text">My Attendance</span></button>
+                <button data-tab="results" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 3.75a.75.75 0 0 1 .75.75v14.03l3.2-3.261a.75.75 0 1 1 1.07 1.05l-4.5 4.604a.75.75 0 0 1-1.07 0l-4.5-4.604a.75.75 0 1 1 1.07-1.05l3.2 3.261V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"></path></svg> <span class="nav-text">My Results</span></button>
+                <button data-tab="diary" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.348 2.595.341 1.24 1.518 1.905 2.66 1.905H6.44l4.5 4.5c.945.945 2.56.276 2.56-1.06V4.06Z"></path></svg> <span class="nav-text">School Diary</span></button>
+            </div>
+            <div class="p-2 border-t mt-auto">
+                <button id="logout-btn" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-red-600 hover:bg-red-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mr-3 flex-shrink-0"><path fill-rule="evenodd" d="M7.5 3.75A1.5 1.5 0 0 0 6 5.25v13.5a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5V15a.75.75 0 0 1 1.5 0v3.75a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3V5.25a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3V9A.75.75 0 0 1 15 9V5.25a1.5 1.5 0 0 0-1.5-1.5h-6Zm10.72 4.72a.75.75 0 0 1 1.06 0l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H9a.75.75 0 0 1 0-1.5h10.94l-1.72-1.72a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path></svg>
+                    <span class="nav-text">Logout</span>
+                </button>
+            </div>
+        </nav>
 
-    <main class="flex-1 p-8 overflow-y-auto hidden">
-        <header class="flex justify-between items-center mb-8">
-            <h2 id="page-title" class="text-3xl font-bold">Dashboard</h2>
-            <div id="student-info" class="text-right"></div>
-        </header>
-        <div id="app-content-container"></div>
-    </main>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="flex justify-between items-center p-4 bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
+                <div class="flex items-center gap-4">
+                    <button id="menu-toggle" class="p-2 rounded-full hover:bg-gray-100 hidden md:block">
+                        <!-- Icon will be inserted by JS -->
+                    </button>
+                    <h2 id="page-title" class="text-xl font-bold">Dashboard</h2>
+                </div>
+                <div id="student-info" class="text-right"></div>
+            </header>
+            <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+                <div id="app-content-container"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+     <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 h-16 bg-white shadow-lg hidden z-50">
+        <button data-tab="dashboard" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 4.5a3 3 0 0 0-3 3v.75a.75.75 0 0 1-1.5 0v-.75a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5v.75a.75.75 0 0 1-1.5 0v-.75a3 3 0 0 0-3-3h-3Z"></path><path fill-rule="evenodd" d="M2.25 12c0-3.573 2.642-6.535 6.07-7.122A.75.75 0 0 1 9 5.628v12.744a.75.75 0 0 1-1.192.594C4.354 18.2 2.25 15.34 2.25 12ZM15 5.628a.75.75 0 0 0-1.192-.594C17.646 5.7 21.75 8.66 21.75 12c0 3.573-2.642 6.535-6.07 7.122A.75.75 0 0 0 15 18.372V5.628Z" clip-rule="evenodd"></path></svg> Dashboard</button>
+        <button data-tab="homework" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.25 4.533A9.708 9.708 0 0 0 6 3.75a9.708 9.708 0 0 0-5.25.783V18a9.708 9.708 0 0 0 5.25.783a9.708 9.708 0 0 0 5.25-.783V4.533Z"></path><path d="M12.75 3.75a9.708 9.708 0 0 1 5.25.783V18a9.708 9.708 0 0 1-5.25.783a9.708 9.708 0 0 1-5.25-.783V4.533c.359-.092.73-.162 1.114-.211A9.73 9.73 0 0 1 8.25 3.75a9.73 9.73 0 0 1 4.5 0Z"></path></svg> Homework</button>
+        <button data-tab="liveclass" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3h-15Zm-1.5 3a1.5 1.5 0 0 1 1.5-1.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5-1.5h-15a1.5 1.5 0 0 1-1.5-1.5v-9Z"></path><path d="M10.03 10.03a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-.75-.75a.75.75 0 1 1 1.06-1.06l.22.22 1.72-1.72a.75.75 0 0 1 1.06 0Zm6-2.25a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75Z"></path></svg> Classes</button>
+        <button data-tab="diary" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.348 2.595.341 1.24 1.518 1.905 2.66 1.905H6.44l4.5 4.5c.945.945 2.56.276 2.56-1.06V4.06Z"></path></svg> Diary</button>
+        <button data-tab="id-card" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"></path><path fill-rule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v14.25c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 19.125V4.875ZM3 16.5c0 .207.168.375.375.375h17.25a.375.375 0 0 0 .375-.375V9.75A.75.75 0 0 0 20.25 9h-1.355a3 3 0 0 1-2.91-2.583A6 6 0 0 0 12 3.75c-1.61 0-3.094.633-4.186 1.667A3.001 3.001 0 0 1 4.905 9H3.75a.75.75 0 0 0-.75.75v6.75Z" clip-rule="evenodd"></path></svg> Profile</button>
+    </div>
+
     <div id="toast" style="position: fixed; bottom: 1.5rem; right: 1.5rem; background-color: #1f2937; color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; z-index: 1200; opacity: 0; transition: opacity .3s ease, transform .3s ease; transform: translateY(20px);"></div>
 
 
@@ -135,8 +157,10 @@
     let results = [];
     let announcements = [];
     let localStream = null;
+    let peerConnection; // For student-teacher WebRTC connection
     let activeDBListeners = [];
     const mainContent = document.getElementById('app-content-container');
+    const rtcConfig = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]};
 
     // --- UTILITIES ---
     function showToast(message) {
@@ -152,9 +176,12 @@
             localStream.getTracks().forEach(track => track.stop());
             localStream = null;
         }
+        if (peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
+        }
         cleanupDBListeners();
-        document.querySelector('nav').classList.add('hidden');
-        document.querySelector('main').classList.add('hidden');
+        document.getElementById('app-container').classList.add('hidden');
         showLogin();
     }
     function cleanupDBListeners() {
@@ -244,8 +271,16 @@
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             const studentParticipant = { id: student.id, name: student.studentName };
-            await db.ref(`liveClasses/${classId}/participants/${student.id}`).set(studentParticipant);
+            const classRef = db.ref(`liveClasses/${classId}`);
+            
+            await classRef.child(`participants/${student.id}`).set(studentParticipant);
+            classRef.child(`participants/${student.id}`).onDisconnect().remove();
+
             renderStudentClassroomView(classId);
+            
+            const liveClass = liveClasses.find(lc => lc.id === classId);
+            initiatePeerConnection(classId, liveClass.teacherId);
+
         } catch(err) {
             console.error("Error joining class:", err);
             showToast("Could not access camera/microphone. Please check permissions.");
@@ -257,43 +292,91 @@
             localStream.getTracks().forEach(track => track.stop());
             localStream = null;
         }
+        if(peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
+        }
         await db.ref(`liveClasses/${classId}/participants/${student.id}`).remove();
         cleanupDBListeners();
         setActiveTab('liveclass');
     }
+    
+    async function initiatePeerConnection(classId, teacherId) {
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        peerConnection.ontrack = event => {
+            const teacherVideo = document.getElementById('teacher-video');
+            if (teacherVideo) {
+                teacherVideo.srcObject = event.streams[0];
+                const placeholder = document.querySelector('.teacher-placeholder');
+                if (placeholder) placeholder.style.display = 'none';
+            }
+        };
+
+        const signalingRef = db.ref(`liveClasses/${classId}/signaling/${student.id}`);
+        peerConnection.onicecandidate = event => {
+            if (event.candidate) {
+                signalingRef.child('fromStudent/candidates').push(event.candidate.toJSON());
+            }
+        };
+
+        addDBListener(signalingRef.child('fromTeacher/offer'), 'value', async (snap) => {
+            const offer = snap.val();
+            if (offer && peerConnection.signalingState === "stable") {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                await signalingRef.child('fromStudent/answer').set({ type: answer.type, sdp: answer.sdp });
+            }
+        });
+
+        addDBListener(signalingRef.child('fromTeacher/candidates'), 'child_added', snap => {
+            const candidate = snap.val();
+            if (candidate) {
+                peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        });
+    }
 
     function renderStudentClassroomView(classId) {
-        document.querySelector('nav').classList.add('hidden');
-        document.querySelector('main header').classList.add('hidden');
-        
-        mainContent.innerHTML = `
-            <div class="classroom-container">
-                <div class="main-video-area">
-                    <div class="teacher-placeholder">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-24 h-24 text-gray-700"><path d="M11.7 2.81a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l3.18 3.18a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-3.18 3.18a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0L8.81 16.2a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l3.18-3.18ZM12 5.44 9.17 8.27l1.06 1.06a.75.75 0 0 1-1.06 1.06l-1.06-1.06L5.44 12l2.83 2.83 1.06-1.06a.75.75 0 0 1 1.06 1.06l-1.06 1.06L12 18.56l2.83-2.83-1.06-1.06a.75.75 0 0 1 1.06-1.06l1.06 1.06L18.56 12l-2.83-2.83-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06L12 5.44Z" /></svg>
+        document.getElementById('app-container').classList.add('hidden');
+        document.getElementById('bottom-nav').classList.add('hidden');
+
+        const classroomEl = document.createElement('div');
+        classroomEl.id = 'classroom-view';
+        classroomEl.innerHTML = `
+            <div class="fixed inset-0 bg-gray-800 flex flex-col md:flex-row">
+                <div class="flex-1 bg-black flex items-center justify-center relative">
+                    <video id="teacher-video" autoplay playsinline class="h-full w-full object-cover"></video>
+                    <div class="teacher-placeholder absolute inset-0 flex flex-col items-center justify-center text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-24 h-24 text-gray-700"><path d="M11.7 2.81a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l3.18 3.18a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-3.18 3.18a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0L8.81 16.2a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l3.18-3.18Z" /></svg>
                         <h3 class="text-xl font-bold mt-4">Waiting for teacher's video...</h3>
-                        <p class="text-gray-400">The class is live.</p>
                     </div>
-                    <div class="my-video-container">
-                         <video id="my-video" autoplay playsinline muted class="transform -scale-x-100"></video>
+                    <div class="absolute bottom-4 right-4 w-32 h-24 md:w-48 md:h-36 rounded-lg overflow-hidden border-2 border-white/50">
+                        <video id="my-video" autoplay playsinline muted class="h-full w-full object-cover transform -scale-x-100"></video>
                     </div>
-                    <div class="video-controls">
-                        <button id="mic-btn" class="control-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M8.25 4.5a3.75 3.75 0 1 1 7.5 0v8.25a3.75 3.75 0 1 1-7.5 0V4.5Z" /><path d="M6 15a.75.75 0 0 1 .75.75v.008c0 3.036 2.464 5.5 5.5 5.5s5.5-2.464 5.5-5.5v-.008a.75.75 0 0 1 1.5 0v.008a7 7 0 0 1-7 7s-7-3.134-7-7v-.008A.75.75 0 0 1 6 15Z" /></svg></button>
-                        <button id="video-btn" class="control-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-2.845l3.52 1.87a.75.75 0 0 0 1.23-.654V8.13a.75.75 0 0 0-1.23-.655L15.75 9.345V7.5a3 3 0 0 0-3-3H4.5Z" /></svg></button>
-                        <button id="leave-class-btn" class="control-btn danger"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M10.25 5.25a.75.75 0 0 0-1.5 0v4.32L6.873 7.72a.75.75 0 0 0-1.054 1.07l1.9 1.85-1.9 1.85a.75.75 0 1 0 1.054 1.07L8.75 11.68v4.57a.75.75 0 0 0 1.5 0v-4.57l1.877 1.82a.75.75 0 1 0 1.054-1.07l-1.9-1.85 1.9-1.85a.75.75 0 0 0-1.054-1.07L10.25 9.57V5.25Z" /><path fill-rule="evenodd" d="M3.75 2.25a.75.75 0 0 0-.75.75v18c0 .414.336.75.75.75h16.5a.75.75 0 0 0 .75-.75V3a.75.75 0 0 0-.75-.75H3.75ZM5.25 3.75h13.5v16.5H5.25V3.75Z" clip-rule="evenodd" /></svg></button>
-                    </div>
-                </div>
-                <div class="classroom-sidebar">
-                    <div class="chat-panel">
-                        <div class="panel-header">Chat</div>
-                        <div id="chat-messages" class="panel-body chat-messages"></div>
-                        <form id="chat-form" class="chat-input"><input type="text" id="chat-input-field" class="form-input" placeholder="Type a message..." required><button type="submit" class="bg-green-600 text-white p-2 rounded-lg">Send</button></form>
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 p-3 rounded-full flex gap-4">
+                        <button id="mic-btn" class="control-btn"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8.25 4.5a3.75 3.75 0 1 1 7.5 0v8.25a3.75 3.75 0 1 1-7.5 0V4.5Z" /><path d="M6 15a.75.75 0 0 1 .75.75v.008c0 3.036 2.464 5.5 5.5 5.5s5.5-2.464 5.5-5.5v-.008a.75.75 0 0 1 1.5 0v.008a7 7 0 0 1-7 7s-7-3.134-7-7v-.008A.75.75 0 0 1 6 15Z" /></svg></button>
+                        <button id="video-btn" class="control-btn"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-2.845l3.52 1.87a.75.75 0 0 0 1.23-.654V8.13a.75.75 0 0 0-1.23-.655L15.75 9.345V7.5a3 3 0 0 0-3-3H4.5Z" /></svg></button>
+                        <button id="leave-class-btn" class="control-btn danger"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.25 5.25a.75.75 0 0 0-1.5 0v4.32L6.873 7.72a.75.75 0 0 0-1.054 1.07l1.9 1.85-1.9 1.85a.75.75 0 1 0 1.054 1.07L8.75 11.68v4.57a.75.75 0 0 0 1.5 0v-4.57l1.877 1.82a.75.75 0 1 0 1.054-1.07l-1.9-1.85 1.9-1.85a.75.75 0 0 0-1.054-1.07L10.25 9.57V5.25Z" /></svg></button>
                     </div>
                 </div>
-            </div>
-        `;
+                <div class="w-full md:w-80 bg-gray-900 text-white flex flex-col">
+                     <div class="p-3 border-b border-gray-700">Chat</div>
+                     <div id="chat-messages" class="p-3 flex-1 overflow-y-auto flex flex-col-reverse"></div>
+                     <form id="chat-form" class="p-3 border-t border-gray-700 flex gap-2"><input type="text" id="chat-input-field" class="bg-gray-800 text-white rounded p-2 flex-1" placeholder="Type..." required><button type="submit" class="bg-green-600 rounded p-2">Send</button></form>
+                </div>
+            </div>`;
+        document.body.appendChild(classroomEl);
+
         document.getElementById('my-video').srcObject = localStream;
-        document.getElementById('leave-class-btn').onclick = () => leaveLiveClass(classId);
+        document.getElementById('leave-class-btn').onclick = () => {
+            leaveLiveClass(classId);
+            document.getElementById('classroom-view').remove();
+            document.getElementById('app-container').classList.remove('hidden');
+        };
         
         cleanupDBListeners();
 
@@ -302,11 +385,11 @@
             const msg = snap.val();
             const chatBox = document.getElementById('chat-messages');
             if (!chatBox) return;
+            // Chat messages are appended, so we insert at the top for reverse column layout
             const msgDiv = document.createElement('div');
-            msgDiv.classList.add('chat-message', msg.senderId === student.id ? 'self' : 'other');
+            msgDiv.classList.add('chat-message', 'mb-2', msg.senderId === student.id ? 'self' : 'other');
             msgDiv.innerHTML = `<div class="font-bold text-sm">${msg.senderName}</div><div>${msg.text}</div>`;
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            chatBox.insertBefore(msgDiv, chatBox.firstChild);
         });
 
         const statusRef = db.ref(`liveClasses/${classId}/status`);
@@ -434,21 +517,49 @@
 
     // --- APP FLOW & NAVIGATION ---
     function setActiveTab(tabName) {
-        document.querySelector('nav').classList.remove('hidden');
-        document.querySelector('main header').classList.remove('hidden');
         cleanupDBListeners();
-
         const pageTitles = { dashboard: 'Dashboard', 'id-card': 'My ID Card', homework: 'Homework', liveclass: 'Live Classes', attendance: 'My Attendance', results: 'My Results', diary: 'School Diary' };
         document.getElementById('page-title').textContent = pageTitles[tabName];
-        document.querySelectorAll('.tab-button').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+        
+        // Sidebar
+        document.querySelectorAll('.sidebar .nav-button').forEach(b => {
+            const isActive = b.dataset.tab === tabName;
+            b.classList.toggle('bg-green-100', isActive);
+            b.classList.toggle('text-green-700', isActive);
+        });
+
+        // Bottom Nav
+        document.querySelectorAll('#bottom-nav button').forEach(b => {
+            b.classList.toggle('active', b.dataset.tab === tabName);
+        });
+
         const renderFunction = { dashboard: renderDashboard, 'id-card': renderMyIDCard, homework: renderHomework, liveclass: renderLiveClass, attendance: renderAttendance, results: renderResults, diary: renderDiary }[tabName];
         if(renderFunction) renderFunction();
+    }
+
+    function initResponsiveUI() {
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        
+        const collapseIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>`;
+        const expandIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>`;
+
+        menuToggle.innerHTML = collapseIcon;
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            menuToggle.innerHTML = isCollapsed ? expandIcon : collapseIcon;
+        });
+
+        document.querySelectorAll('.nav-button, .bottom-nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
+        });
     }
     
     async function runApp(loggedInUser) {
         document.getElementById('login-overlay').classList.add('hidden');
-        document.querySelector('nav').classList.remove('hidden');
-        document.querySelector('main').classList.remove('hidden');
+        document.getElementById('app-container').classList.remove('hidden');
         mainContent.innerHTML = `<div class="text-center p-8"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div><p class="mt-4 text-gray-600">Loading your data...</p></div>`;
         
         try {
@@ -473,8 +584,8 @@
             announcements = Object.values(announcementsSnap.val() || {});
 
             document.getElementById('student-info').innerHTML = `<p class="font-semibold">${student.studentName}</p><p class="text-sm text-gray-500">Class ${student.className}-${student.section}</p>`;
-            document.querySelectorAll('.tab-button').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
             document.getElementById('logout-btn').addEventListener('click', logout);
+            initResponsiveUI();
             setActiveTab('dashboard');
 
         } catch (error) {
