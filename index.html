@@ -469,15 +469,16 @@
         let boardingHTML = '';
 
         if (tripType === 'drop') {
+            const boardTime = boardingInfo ? new Date(boardingInfo.boardedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
             if (dropOffInfo) {
                 const dropTime = new Date(dropOffInfo.droppedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 statusHTML = `<p class="text-2xl font-bold text-blue-800 text-center">Dropped Off Successfully</p><p class="text-gray-600 text-center">At ${dropTime}</p>`;
-                boardingHTML = `<p class="text-lg font-semibold text-blue-700 text-center">Trip Completed</p>`;
+                boardingHTML = `<p class="text-lg font-semibold text-blue-700 text-center">Trip Completed for you.</p>`;
             } else if (boardingInfo) {
                 showCountdown = true;
-                boardingHTML = `<p class="text-lg font-semibold text-green-700 text-center">You are on the bus, on the way home.</p>`;
+                boardingHTML = `<p class="text-lg font-semibold text-green-700 text-center">You boarded the bus at ${boardTime}, on the way home.</p>`;
             } else {
-                 boardingHTML = `<p class="text-lg font-semibold text-gray-500 text-center">Waiting for the trip to start from school.</p>`;
+                 boardingHTML = `<p class="text-lg font-semibold text-gray-500 text-center">Waiting to board the bus at school.</p>`;
             }
         } else { // pickup
              if (boardingInfo) {
@@ -540,8 +541,9 @@
             window.spokenTwoMinutes = false;
             window.spokenArrival = false;
             const arrivalTime = new Date(countdownEndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const action = tripType === 'pickup' ? 'pick you up' : 'drop you off';
-            speak(`${student.studentName}, please get ready. Bus number ${bus.busNumber} will ${action} at your stop, ${student.transportInfo.stopName}, around ${arrivalTime}.`);
+            const action = tripType === 'pickup' ? 'pick you up at' : 'drop you off at';
+            const location = student.transportInfo.stopName || 'your stop';
+            speak(`${student.studentName}, please get ready. Bus number ${bus.busNumber} will ${action} ${location}, around ${arrivalTime}.`);
         }
 
         if (liveStatus !== 'On Way') {
