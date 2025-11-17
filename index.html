@@ -133,6 +133,12 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <div id="student-info" class="text-right"></div>
+                    <div class="relative">
+                        <button id="notification-bell" class="relative p-2 rounded-full hover:bg-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"></path></svg>
+                            <span id="notification-count" class="absolute top-1 right-1 bg-red-500 text-white rounded-full flex items-center justify-center hidden" style="width: 1rem; height: 1rem; font-size: 0.625rem; line-height: 1rem;">0</span>
+                        </button>
+                    </div>
                 </div>
             </header>
             <main class="flex-1 p-4 md:p-8 overflow-y-auto">
@@ -212,6 +218,8 @@
     let currentEtaInfo = null;
     let isCountdownPaused = false;
     let pausedRemainingMs = 0;
+    let countdownEndTime = 0;
+    let outgoingCallRef = null;
 
 
     const mainContent = document.getElementById('app-content-container');
@@ -236,9 +244,15 @@
         if (countdownIntervalId) {
             clearInterval(countdownIntervalId);
             countdownIntervalId = null;
-            currentEtaInfo = null;
-            isCountdownPaused = false;
-            pausedRemainingMs = 0;
+        }
+        currentEtaInfo = null;
+        isCountdownPaused = false;
+        pausedRemainingMs = 0;
+        countdownEndTime = 0;
+        
+        if (outgoingCallRef) {
+            outgoingCallRef.remove();
+            outgoingCallRef = null;
         }
         activeDBListeners.forEach(l => l.ref.off(l.type, l.callback));
         activeDBListeners = [];
@@ -420,7 +434,20 @@
             <button onclick="callDriver('${driver.id}', '${driver.staffName}')" class="py-3 px-6 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">Call Driver</button>
         </div>` : '';
     
-        const tripTypeText = tripType === 'pickup' ? 'Morning Trip (to School)' : (tripType === 'drop' ? 'Afternoon Trip (to Home)' : 'Trip Active');
+        if (!tripId) {
+             container.innerHTML = `
+                <p class="text-lg font-semibold">Bus: ${bus.busNumber}</p>
+                <p class="text-lg font-semibold">Your Stop: ${student.transportInfo.stopName}</p>
+                <div class="mt-4 p-4 bg-gray-100 rounded-lg text-center">
+                    <p class="text-2xl font-bold text-gray-700">Trip is not active.</p>
+                    <p class="text-gray-500 mt-1">Please check back later.</p>
+                </div>
+                ${commsHTML}
+             `;
+             return;
+        }
+
+        const tripTypeText = tripType === 'pickup' ? 'Morning Trip (to School)' : 'Afternoon Trip (to Home)';
 
         container.innerHTML = `
             <p class="text-lg font-semibold">Bus: ${bus.busNumber}</p>
@@ -444,416 +471,274 @@
         if (tripType === 'drop') {
             if (dropOffInfo) {
                 const dropTime = new Date(dropOffInfo.droppedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                statusHTML = `<p class="text-2xl font-bold text-blue-800">Dropped Off Successfully</p><p class="text-gray-600">At ${dropTime}</p>`;
-                boardingHTML = `<p class="text-lg font-semibold text-blue-700">Trip Completed</p>`;
+                statusHTML = `<p class="text-2xl font-bold text-blue-800 text-center">Dropped Off Successfully</p><p class="text-gray-600 text-center">At ${dropTime}</p>`;
+                boardingHTML = `<p class="text-lg font-semibold text-blue-700 text-center">Trip Completed</p>`;
             } else if (boardingInfo) {
                 showCountdown = true;
-                boardingHTML = `<p class="text-lg font-semibold text-green-700">On the way Home</p>`;
-            } else if(tripId) {
-                statusHTML = `<p class="text-2xl font-bold text-gray-700">Not on Bus</p><p class="text-gray-500">Student was not on the bus for the afternoon trip.</p>`;
-                boardingHTML = `<p class="text-lg font-semibold text-gray-600">Absent from Drop Trip</p>`;
+                boardingHTML = `<p class="text-lg font-semibold text-green-700 text-center">You are on the bus, on the way home.</p>`;
+            } else {
+                 boardingHTML = `<p class="text-lg font-semibold text-gray-500 text-center">Waiting for the trip to start from school.</p>`;
             }
-        } else if (tripType === 'pickup') {
+        } else { // pickup
              if (boardingInfo) {
-                statusHTML = `<p class="text-2xl font-bold text-green-700">On the way to School</p>`;
-                boardingHTML = `<p class="text-lg font-semibold text-green-700">Boarded Successfully</p>`;
-             } else {
+                const boardTime = new Date(boardingInfo.boardedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                statusHTML = `<p class="text-2xl font-bold text-green-800 text-center">Picked Up Successfully</p><p class="text-gray-600 text-center">At ${boardTime}</p>`;
+                boardingHTML = `<p class="text-lg font-semibold text-green-700 text-center">On the way to school.</p>`;
+            } else {
                 showCountdown = true;
-                boardingHTML = `<p class="text-lg font-semibold text-yellow-700">Waiting for Pickup</p>`;
-             }
-        }
-
-        if (!tripId) {
-             statusHTML = `<p class="text-2xl font-bold text-gray-700">Trip Not Active</p>`;
-             boardingHTML = `<p class="text-lg font-semibold text-gray-600">No active trip</p>`;
-        }
-        
-        boardingContainer.innerHTML = `<div class="p-4 bg-gray-100 border-gray-200 rounded-lg text-center">${boardingHTML}</div>`;
-
-        if (showCountdown && etaInfo && (!currentEtaInfo || etaInfo.setAt !== currentEtaInfo.setAt)) {
-            currentEtaInfo = etaInfo;
-            if (countdownIntervalId) clearInterval(countdownIntervalId);
-            isCountdownPaused = false;
-    
-            const targetTime = etaInfo.setAt + (etaInfo.eta * 60 * 1000);
-            const initialTotalSeconds = etaInfo.eta * 60;
-            let notificationState = { firstWarning: false, finalWarning: false };
-    
-            const etaTitle = tripType === 'drop' ? 'Bus Arriving Home In' : 'Bus Arriving for Pickup In';
-
-            etaContainer.innerHTML = `
-                <div id="countdown-display" class="p-4 rounded-lg text-white text-center transition-colors duration-500">
-                    <p class="text-sm uppercase tracking-wider">${etaTitle}</p>
-                    <p id="countdown-timer" class="text-5xl font-extrabold tracking-tight">--:--</p>
-                </div>
-            `;
-            
-            const timerEl = document.getElementById('countdown-timer');
-            const displayEl = document.getElementById('countdown-display');
-    
-            const updateCountdown = () => {
-                if (!timerEl || !displayEl || isCountdownPaused) {
-                    if(isCountdownPaused && timerEl) {
-                        timerEl.innerHTML = timerEl.textContent.split(' ')[0] + ' ⏸️';
-                    }
-                    clearInterval(countdownIntervalId);
-                    return;
-                }
-                const remainingMs = targetTime - Date.now();
-                if (remainingMs <= 0) {
-                    clearInterval(countdownIntervalId);
-                    countdownIntervalId = null;
-                    currentEtaInfo = null;
-
-                    let arrivalMessage = "Bus has arrived!";
-                    if(tripType === 'drop') {
-                        displayEl.innerHTML = `<p class="text-2xl font-bold">Bus has arrived at your stop!</p><p class="text-sm">Please receive ${student.studentName}.</p>`;
-                        arrivalMessage = `The bus has arrived at your stop. Please pick up ${student.studentName}.`;
-                    } else {
-                        displayEl.innerHTML = `<p class="text-2xl font-bold">Bus has arrived for pickup!</p>`;
-                        arrivalMessage = `Your bus has arrived for pickup!`;
-                    }
-                    
-                    displayEl.classList.remove('bg-red-500', 'bg-yellow-500');
-                    displayEl.classList.add('bg-green-500');
-                    speak(arrivalMessage);
-                    return;
-                }
-    
-                const remainingSeconds = Math.round(remainingMs / 1000);
-                const minutes = Math.floor(remainingSeconds / 60);
-                const seconds = remainingSeconds % 60;
-                timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                
-                const timeRatio = remainingSeconds / initialTotalSeconds;
-                displayEl.classList.remove('bg-red-500', 'bg-yellow-500', 'bg-green-500');
-                if (timeRatio > 2/3) displayEl.classList.add('bg-red-500');
-                else if (timeRatio > 1/3) displayEl.classList.add('bg-yellow-500');
-                else displayEl.classList.add('bg-green-500');
-    
-                const firstWarningThreshold = initialTotalSeconds * (2/3);
-                const finalWarningThreshold = 120;
-    
-                if (remainingSeconds <= finalWarningThreshold && !notificationState.finalWarning) {
-                    if (tripType === 'drop') {
-                        speak(`${student.studentName} is about to be dropped off. Please be ready to receive them.`);
-                    } else {
-                        speak(`Your bus is about to arrive for pickup. Please be ready.`);
-                    }
-                    notificationState.finalWarning = true;
-                } else if (remainingSeconds <= firstWarningThreshold && !notificationState.firstWarning) {
-                    if (tripType === 'drop') {
-                        speak(`Attention, we are on our way to drop off ${student.studentName}.`);
-                    } else {
-                        speak(`Attention ${student.studentName}, your bus is approaching your stop.`);
-                    }
-                    notificationState.firstWarning = true;
-                }
-            };
-    
-            if (liveStatus === 'On Way') {
-                countdownIntervalId = setInterval(updateCountdown, 1000);
-                updateCountdown();
-            } else {
-                 updateCountdown(); // run once to display time
-                 if (timerEl) timerEl.innerHTML += ' ⏸️';
-            }
-        } else if (!showCountdown) {
-            if (countdownIntervalId) clearInterval(countdownIntervalId);
-            currentEtaInfo = null;
-            if (statusHTML) {
-                 etaContainer.innerHTML = `<div class="p-4 bg-gray-100 rounded-lg text-center">${statusHTML}</div>`;
-            } else {
-                etaContainer.innerHTML = '';
+                boardingHTML = `<p class="text-lg font-semibold text-gray-500 text-center">Waiting for pickup.</p>`;
             }
         }
+
+        boardingContainer.innerHTML = `<div class="p-4 bg-gray-50 rounded-lg">${boardingHTML}</div>`;
         
-        // Handle pause and resume based on liveStatus
-        if (liveStatus === 'Stopped in Traffic' && countdownIntervalId && !isCountdownPaused) {
-            const targetTime = currentEtaInfo.setAt + (currentEtaInfo.eta * 60 * 1000);
-            pausedRemainingMs = targetTime - Date.now();
-            clearInterval(countdownIntervalId);
-            countdownIntervalId = null;
+        if (showCountdown) {
+             if (etaInfo) {
+                startCountdown(etaInfo, liveStatus, bus, tripType);
+            } else {
+                etaContainer.innerHTML = `<div class="text-center p-4 bg-gray-100 rounded-lg"><p class="font-semibold">Waiting for driver to set ETA...</p></div>`;
+            }
+        } else {
+            etaContainer.innerHTML = `<div class="text-center p-4 bg-gray-100 rounded-lg">${statusHTML}</div>`;
+        }
+    }
+
+    function startCountdown(etaInfo, liveStatus, bus, tripType) {
+        if (countdownIntervalId) clearInterval(countdownIntervalId);
+        
+        const isNewEta = JSON.stringify(etaInfo) !== JSON.stringify(currentEtaInfo);
+        currentEtaInfo = etaInfo;
+        
+        const etaMs = etaInfo.eta * 60 * 1000;
+        countdownEndTime = etaInfo.setAt + etaMs;
+
+        const updateTimer = () => {
+            if (isCountdownPaused) return;
+
+            const remainingMs = countdownEndTime - Date.now();
+            pausedRemainingMs = remainingMs;
+
+            if (remainingMs <= 0) {
+                clearInterval(countdownIntervalId);
+                countdownIntervalId = null;
+                updateCountdownDisplay(0);
+                if (!window.spokenArrival) {
+                    speak("The bus is arriving now.");
+                    window.spokenArrival = true;
+                }
+            } else {
+                updateCountdownDisplay(remainingMs);
+                const remainingMinutes = Math.floor(remainingMs / 60000);
+                if (remainingMinutes === 2 && !window.spokenTwoMinutes) {
+                    speak("The bus is about 2 minutes away.");
+                    window.spokenTwoMinutes = true;
+                }
+            }
+        };
+        
+        if(isNewEta) {
+            window.spokenTwoMinutes = false;
+            window.spokenArrival = false;
+            const arrivalTime = new Date(countdownEndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const action = tripType === 'pickup' ? 'pick you up' : 'drop you off';
+            speak(`${student.studentName}, please get ready. Bus number ${bus.busNumber} will ${action} at your stop, ${student.transportInfo.stopName}, around ${arrivalTime}.`);
+        }
+
+        if (liveStatus !== 'On Way') {
             isCountdownPaused = true;
-            const timerEl = document.getElementById('countdown-timer');
-            if (timerEl) timerEl.innerHTML += ' ⏸️';
-        } else if (liveStatus === 'On Way' && isCountdownPaused) {
+            pausedRemainingMs = countdownEndTime > Date.now() ? countdownEndTime - Date.now() : 0;
+            updateCountdownDisplay(pausedRemainingMs);
+        } else {
             isCountdownPaused = false;
-            if (currentEtaInfo) {
-                // To restart, we trick the logic into thinking it's a new ETA
-                const newEtaInfo = { ...currentEtaInfo, setAt: Date.now() };
-                const remainingMinutes = Math.max(0, pausedRemainingMs / (60 * 1000));
-                newEtaInfo.eta = remainingMinutes;
-                currentEtaInfo = null; // Force re-initialization
-                renderTransportStatus({bus, tripId, location, boardingInfo, dropOffInfo, driver, etaInfo: newEtaInfo, liveStatus, tripType});
-            }
+            updateTimer();
+            countdownIntervalId = setInterval(updateTimer, 1000);
         }
     }
 
-    function renderResults() {
-        const myResults = allResults.filter(r => r.className === student.className && r.section === student.section);
-        const resultsByExam = myResults.reduce((acc, curr) => {
-            (acc[curr.examType] = acc[curr.examType] || []).push(curr);
-            return acc;
-        }, {});
+    function updateCountdownDisplay(remainingMs) {
+        const etaContainer = document.getElementById('eta-section');
+        if (!etaContainer || !currentEtaInfo) return;
 
-        if (Object.keys(resultsByExam).length === 0) {
-            mainContent.innerHTML = `<div class="card text-center"><p>Your results have not been published yet.</p></div>`;
-            return;
-        }
-
-        mainContent.innerHTML = Object.entries(resultsByExam).map(([examType, results]) => `
-            <div class="card mb-6">
-                <h3 class="text-xl font-bold mb-4">${examType}</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-50"><tr class="border-b"><th class="p-3">Subject</th><th class="p-3">Marks Obtained</th></tr></thead>
-                        <tbody>
-                            ${results.map(r => `
-                                <tr class="border-b">
-                                    <td class="p-3 font-semibold">${r.subject}</td>
-                                    <td class="p-3">${r.results[student.id] || 'N/A'}</td>
-                                </tr>`).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function renderLeaveApplication() { 
-        const myLeaves = allLeaves.filter(l => l.applicantId === student.id).sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
-        const getStatusBadge = (status) => {
-            if (status === 'Approved') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">${status}</span>`;
-            if (status === 'Rejected') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">${status}</span>`;
-            return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">${status}</span>`;
-        };
-
-        mainContent.innerHTML = `
-            <div class="card">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold">My Leave Applications</h3>
-                    <button id="apply-leave-btn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg">Apply for Leave</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead><tr class="border-b"><th class="p-3">Dates</th><th class="p-3">Reason</th><th class="p-3">Status</th></tr></thead>
-                        <tbody>
-                            ${myLeaves.length > 0 ? myLeaves.map(leave => `
-                            <tr class="border-b">
-                                <td class="p-3">${leave.startDate} to ${leave.endDate}</td>
-                                <td class="p-3">${leave.reason}</td>
-                                <td class="p-3">${getStatusBadge(leave.status)}</td>
-                            </tr>`).join('') : `<tr><td colspan="3" class="text-center p-8 text-gray-500">No leave applications found.</td></tr>`}
-                        </tbody>
-                    </table>
-                </div>
-            </div>`;
+        const totalDuration = currentEtaInfo.eta * 60 * 1000;
+        const minutes = Math.floor(remainingMs / 60000);
+        const seconds = Math.floor((remainingMs % 60000) / 1000);
+        const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         
-        document.getElementById('apply-leave-btn').addEventListener('click', () => {
-             const modal = document.createElement('div');
-            modal.className = 'modal active';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3 class="text-xl font-bold mb-4">New Leave Application</h3>
-                    <form id="leave-form" class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><label>Start Date</label><input type="date" id="start-date" class="form-input mt-1" required></div>
-                            <div><label>End Date</label><input type="date" id="end-date" class="form-input mt-1" required></div>
-                        </div>
-                        <div><label>Reason</label><textarea id="reason" class="form-textarea mt-1" rows="4" required></textarea></div>
-                        <div class="flex justify-end gap-3 pt-2">
-                            <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg" onclick="this.closest('.modal').remove()">Cancel</button>
-                            <button type="submit" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg">Submit</button>
-                        </div>
-                    </form>
-                </div>`;
-            document.body.appendChild(modal);
-            modal.querySelector('#leave-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const leaveId = Date.now().toString();
-                const leaveData = {
-                    id: leaveId, applicantId: student.id, applicantName: student.studentName,
-                    applicantType: 'student',
-                    startDate: document.getElementById('start-date').value,
-                    endDate: document.getElementById('end-date').value,
-                    reason: document.getElementById('reason').value,
-                    status: 'Pending', submittedAt: new Date().toISOString()
-                };
-                await db.ref('leaves/' + leaveId).set(leaveData);
-                allLeaves.push(leaveData);
-                showToast("Leave application submitted.");
-                renderLeaveApplication();
-                modal.remove();
+        const percentRemaining = (remainingMs / totalDuration) * 100;
+        let colorClasses = 'bg-green-100 text-green-800';
+        if (percentRemaining > 66) {
+            colorClasses = 'bg-red-100 text-red-800';
+        } else if (percentRemaining > 33) {
+            colorClasses = 'bg-yellow-100 text-yellow-800';
+        }
+
+        const statusText = isCountdownPaused ? `<p class="font-bold text-yellow-600 text-lg animate-pulse">TIMER PAUSED (Traffic)</p>` : `<p class="font-bold text-gray-600 text-lg">Estimated Arrival In:</p>`;
+
+        etaContainer.innerHTML = `
+            <div class="p-6 rounded-lg text-center ${colorClasses}">
+                ${statusText}
+                <p class="text-6xl font-extrabold tracking-tighter">${timeString}</p>
+            </div>
+        `;
+    }
+
+    async function callDriver(driverId, driverName) {
+        if (!student) return;
+        const callModal = document.getElementById('call-modal');
+        document.getElementById('call-modal-title').textContent = driverName;
+        callModal.classList.add('active');
+
+        const callId = `call_${Date.now()}`;
+        outgoingCallRef = db.ref(`calls/${driverId}/${callId}`);
+        try {
+            await outgoingCallRef.set({
+                from: student.id,
+                fromName: student.studentName,
+                timestamp: Date.now()
             });
-        });
+        } catch(e) {
+            showToast("Failed to place call. Check connection.", true);
+            endCall();
+        }
     }
 
-    function renderMyProfile() { 
-        mainContent.innerHTML = `
-        <div class="card max-w-lg mx-auto">
-            <h3 class="text-2xl font-bold text-center mb-6">${student.studentName}</h3>
-            <div class="space-y-3 text-lg">
-                <div class="flex justify-between"><span class="font-semibold text-gray-600">Admission No:</span><span>${student.admissionNumber}</span></div>
-                <div class="flex justify-between"><span class="font-semibold text-gray-600">Class:</span><span>${student.className}-${student.section}</span></div>
-                <div class="flex justify-between"><span class="font-semibold text-gray-600">Father's Name:</span><span>${student.fatherName}</span></div>
-                <div class="flex justify-between"><span class="font-semibold text-gray-600">Mobile:</span><span>${student.mobile}</span></div>
-                <div class="pt-2"><p class="font-semibold text-gray-600">Address:</p><p>${student.address}</p></div>
-            </div>
-        </div>`;
-    }
-
-    function renderLiveClass() { 
-        const myLiveClasses = allLiveClasses
-            .filter(lc => lc.className === student.className && lc.section === student.section)
-            .sort((a,b) => new Date(b.date + ' ' + b.startTime) - new Date(a.date + ' ' + a.startTime));
-        
-        const getStatusBadge = (status) => {
-            if (status === 'live') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Live</span>`;
-            if (status === 'ended') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Ended</span>`;
-            return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Scheduled</span>`;
-        };
-
-        const classList = myLiveClasses.length > 0 ? myLiveClasses.map(lc => `
-            <div class="card">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="text-lg font-bold">${lc.topic}</h3>
-                        <p class="text-sm font-semibold text-gray-500">${lc.subject} - by ${lc.teacherName}</p>
-                        <p class="text-sm text-gray-500">${lc.date} at ${lc.startTime}</p>
-                    </div>
-                    <div>${getStatusBadge(lc.status)}</div>
-                </div>
-            </div>
-        `).join('') : '<p class="text-center text-gray-500 py-8">No live classes scheduled for you.</p>';
-
-        mainContent.innerHTML = `<div class="space-y-4">${classList}</div>`;
-    }
-
-    // --- CHAT & CALL ---
     function endCall() {
-        const modal = document.getElementById('call-modal');
-        const sound = document.getElementById('call-sound');
-        sound.pause();
-        sound.currentTime = 0;
-        modal.classList.remove('active');
+        const callModal = document.getElementById('call-modal');
+        callModal.classList.remove('active');
+        if (outgoingCallRef) {
+            outgoingCallRef.remove();
+            outgoingCallRef = null;
+        }
     }
 
-    function callDriver(driverId, driverName) {
-        const modal = document.getElementById('call-modal');
-        const sound = document.getElementById('call-sound');
-        document.getElementById('call-modal-title').textContent = `${driverName}`;
-        sound.play().catch(e => console.error("Audio play failed:", e));
-        modal.classList.add('active');
-    }
-
-    const chatCallback = (snapshot) => {
-        const messagesContainer = document.getElementById('chat-messages');
-        if (!messagesContainer) return;
-        const messages = Object.values(snapshot.val() || {}).sort((a, b) => a.timestamp - b.timestamp);
-        messagesContainer.innerHTML = messages.map(msg => `<div class="chat-bubble ${msg.senderId === student.id ? 'sent' : 'received'}">${msg.text}</div>`).join('');
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    };
-    
     function openChatWithDriver(driverId, driverName) {
         const modal = document.getElementById('chat-modal');
-        document.getElementById('chat-header-title').textContent = `Chat with Driver (${driverName})`;
-        document.getElementById('chat-messages').innerHTML = '';
+        document.getElementById('chat-header-title').textContent = `Chat with Driver ${driverName}`;
+        const messagesContainer = document.getElementById('chat-messages');
+        messagesContainer.innerHTML = '';
         modal.classList.add('active');
-        
+
         const chatId = `${driverId}_${student.id}`;
         const chatRef = db.ref(`chats/${chatId}`);
-        if (currentChatListener) currentChatListener.ref.off('value', currentChatListener.callback);
         
+        if (currentChatListener) {
+            currentChatListener.ref.off('value', currentChatListener.callback);
+        }
+        
+        const chatCallback = (snapshot) => {
+            if (!messagesContainer) return;
+            const messages = Object.values(snapshot.val() || {}).sort((a,b) => a.timestamp - b.timestamp);
+            messagesContainer.innerHTML = messages.map(msg => {
+                return `<div class="chat-bubble ${msg.senderId === student.id ? 'sent' : 'received'}">${msg.text}</div>`;
+            }).join('');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        };
+
         chatRef.on('value', chatCallback);
         currentChatListener = { ref: chatRef, callback: chatCallback };
 
         const chatForm = document.getElementById('chat-form');
-        const newForm = chatForm.cloneNode(true);
-        chatForm.parentNode.replaceChild(newForm, chatForm);
+        const newChatForm = chatForm.cloneNode(true);
+        chatForm.parentNode.replaceChild(newChatForm, chatForm);
 
-        newForm.addEventListener('submit', async (e) => {
+        newChatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (!text) return;
 
-            const message = { senderId: student.id, receiverId: driverId, text, timestamp: Date.now() };
+            const message = {
+                senderId: student.id,
+                receiverId: driverId,
+                text,
+                timestamp: Date.now()
+            };
             await chatRef.push(message);
             input.value = '';
         });
     }
 
-    // --- APP FLOW & NAVIGATION ---
+    function renderLiveClass() {
+        mainContent.innerHTML = `<div class="card text-center"><p>Live Class details will appear here.</p></div>`;
+    }
+    function renderResults() {
+        mainContent.innerHTML = `<div class="card text-center"><p>Results will be displayed here.</p></div>`;
+    }
+    function renderLeaveApplication() {
+        mainContent.innerHTML = `<div class="card text-center"><p>Leave Application form will be here.</p></div>`;
+    }
+    function renderMyProfile() {
+        mainContent.innerHTML = `<div class="card text-center"><p>Your profile details will be shown here.</p></div>`;
+    }
+    
+    // --- APP FLOW ---
     const tabs = {
-        dashboard: { render: renderDashboard, title: "Dashboard" },
-        'id-card': { render: renderIdCard, title: "My ID Card" },
-        homework: { render: renderHomework, title: "Homework" },
-        liveclass: { render: renderLiveClass, title: "Live Class" },
-        transport: { render: renderTransport, title: "Transport" },
-        results: { render: renderResults, title: "Results" },
-        'leave-application': { render: renderLeaveApplication, title: "Leave Application" },
-        'my-profile': { render: renderMyProfile, title: "My Profile" },
+        dashboard: { render: renderDashboard },
+        'id-card': { render: renderIdCard },
+        homework: { render: renderHomework },
+        transport: { render: renderTransport },
+        liveclass: { render: renderLiveClass },
+        results: { render: renderResults },
+        'leave-application': { render: renderLeaveApplication },
+        'my-profile': { render: renderMyProfile },
     };
 
     function setActiveTab(tabName) {
         cleanupDBListeners();
-        document.getElementById('page-title').textContent = tabs[tabName]?.title || "Student Portal";
+
+        const pageTitles = {
+            dashboard: 'Dashboard', 'id-card': 'My ID Card', homework: 'Homework',
+            transport: 'Transport', liveclass: 'Live Class', results: 'Results',
+            'leave-application': 'Leave Application', 'my-profile': 'My Profile'
+        };
+        document.getElementById('page-title').textContent = pageTitles[tabName];
         
-        document.querySelectorAll('.sidebar .nav-button').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
-        document.querySelectorAll('#bottom-nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+        document.querySelectorAll('.nav-button, .bottom-nav-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.tab === tabName);
+            if(b.classList.contains('nav-button')) {
+                 b.classList.toggle('bg-green-100', b.dataset.tab === tabName);
+                 b.classList.toggle('text-green-700', b.dataset.tab === tabName);
+            }
+        });
 
         const renderFunction = tabs[tabName]?.render;
-        if(renderFunction) {
-            renderFunction();
-        } else {
-            mainContent.innerHTML = `<div class="card text-center">This feature is under development.</div>`;
-        }
+        if(renderFunction) renderFunction();
     }
 
     async function runApp(loggedInUser) {
         document.getElementById('login-overlay').classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
-        mainContent.innerHTML = `<div class="text-center p-8">Loading your portal...</div>`;
 
         try {
-            const [studentsSnap, homeworkSnap, resultsSnap, liveClassesSnap, busesSnap, busTripsSnap, leavesSnap, staffSnap] = await Promise.all([
+            const [studentsSnap, staffSnap, homeworkSnap, busesSnap] = await Promise.all([
                 db.ref('students').once('value'),
-                db.ref('homework').once('value'),
-                db.ref('results').once('value'),
-                db.ref('liveClasses').once('value'),
-                db.ref('buses').once('value'),
-                db.ref('busTrips').once('value'),
-                db.ref('leaves').once('value'),
                 db.ref('staff').once('value'),
+                db.ref('homework').once('value'),
+                db.ref('buses').once('value'),
             ]);
             
             allStudents = Object.values(studentsSnap.val() || {});
             allStaff = Object.values(staffSnap.val() || {});
-            allHomework = Object.values(homeworkSnap.val() || {});
-            allResults = Object.values(resultsSnap.val() || {});
-            allLiveClasses = Object.values(liveClassesSnap.val() || {});
-            allBuses = Object.values(busesSnap.val() || {});
-            allBusTrips = Object.values(busTripsSnap.val() || {});
-            allLeaves = Object.values(leavesSnap.val() || {});
+            allHomework = Object.values(homeworkSnap.val() || []);
+            allBuses = Object.values(busesSnap.val() || []);
 
-            student = allStudents.find(s => s && s.id === loggedInUser.id);
-            if (!student) {
+            student = allStudents.find(s => s.id === loggedInUser.id);
+            if(!student) {
                 logout();
-                throw new Error('Student profile not found.');
+                throw new Error("Student profile not found.");
             }
-            
+
             document.getElementById('student-info').innerHTML = `<p class="font-semibold">${student.studentName}</p><p class="text-sm text-gray-500">${student.className}-${student.section}</p>`;
             
             document.querySelectorAll('.nav-button, .bottom-nav-btn').forEach(btn => {
                 btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
             });
-
+            
             setActiveTab('dashboard');
 
         } catch (error) {
-            console.error("Failed to load student data:", error);
-            mainContent.innerHTML = `<div class="card text-red-700 bg-red-100"><h3 class="font-bold">Error</h3><p>Could not load your data. Please log out and try again.</p></div>`;
+            console.error("Failed to load data:", error);
+            showToast("Could not load required data.");
         }
     }
     
@@ -867,8 +752,6 @@
             e.preventDefault();
             const admissionNo = document.getElementById('student-admission-no').value;
             const mobile = document.getElementById('student-mobile').value;
-            const button = form.querySelector('button[type="submit"]');
-            button.disabled = true; button.textContent = 'Verifying...';
             
             try {
                 const snapshot = await db.ref('students').orderByChild('admissionNumber').equalTo(admissionNo).once('value');
@@ -881,28 +764,23 @@
                         sessionStorage.setItem('loggedInUser', JSON.stringify(user));
                         runApp(user);
                     } else {
-                        showToast('Mobile number does not match admission number.');
+                        showToast('Mobile number does not match.', true);
                     }
                 } else {
-                    showToast('Admission number not found.');
+                    showToast('Admission number not found.', true);
                 }
             } catch (err) {
-                showToast('Login failed. Check your connection.');
+                showToast('Login failed. Check connection.', true);
                 console.error(err);
-            } finally {
-                button.disabled = false; button.textContent = 'Login';
             }
         });
-        
         document.getElementById('logout-btn').addEventListener('click', logout);
 
         let loggedInUser = null;
         try {
             const userData = sessionStorage.getItem('loggedInUser');
             if (userData) loggedInUser = JSON.parse(userData);
-        } catch (e) {
-            sessionStorage.removeItem('loggedInUser');
-        }
+        } catch (e) { sessionStorage.removeItem('loggedInUser'); }
         
         if (loggedInUser && loggedInUser.role === 'student') {
             runApp(loggedInUser);
