@@ -37,7 +37,6 @@
             border-radius: 0.5rem; font-size: 1rem; background-color: var(--bg-secondary);
         }
         
-        /* New Responsive Layout */
         .sidebar { transition: width 0.3s ease; }
         .sidebar.collapsed { width: 5rem; }
         .sidebar.collapsed .sidebar-header-text, .sidebar.collapsed .nav-text { display: none; }
@@ -46,27 +45,36 @@
         #bottom-nav { border-top: 1px solid var(--border-color); }
         .bottom-nav-btn { color: var(--text-secondary); }
         .bottom-nav-btn.active { color: var(--accent-primary); }
+        .nav-button.active { background-color: #dcfce7; color: var(--accent-primary); }
+        
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); display: none;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content { background-color: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 500px; }
+
+        #chat-modal .modal-content {
+            height: 70vh; max-width: 450px; padding: 0; display: flex; flex-direction: column;
+        }
+        #chat-header { padding: 1rem 1.5rem; border-bottom: 1px solid #e5e7eb; font-weight: 700; }
+        #chat-messages { flex-grow: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; }
+        .chat-bubble { max-width: 80%; padding: 0.5rem 1rem; border-radius: 1rem; margin-bottom: 0.5rem; }
+        .chat-bubble.sent { background-color: var(--accent-primary); color: white; align-self: flex-end; border-bottom-right-radius: 0.25rem; }
+        .chat-bubble.received { background-color: #e5e7eb; color: var(--text-primary); align-self: flex-start; border-bottom-left-radius: 0.25rem; }
+        #chat-form { padding: 1rem; border-top: 1px solid #e5e7eb; display: flex; gap: 0.5rem; }
 
         @media (max-width: 767px) {
             .sidebar { display: none; }
             #bottom-nav { display: flex; }
-            main { padding-bottom: 5rem; } /* Space for bottom nav */
+            main { padding-bottom: 5rem; } 
         }
         @media (min-width: 768px) {
             #menu-toggle { display: block; }
             #bottom-nav { display: none; }
         }
-
-        /* Live Class View */
-        .control-btn { width: 48px; height: 48px; border-radius: 50%; background-color: rgba(255,255,255,0.2); color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; transition: background-color 0.2s; }
-        .control-btn:hover:not(:disabled) { background-color: rgba(255,255,255,0.3); }
-        .control-btn:disabled { background-color: rgba(107, 114, 128, 0.5); cursor: not-allowed; }
-        .control-btn.danger { background-color: #ef4444; }
-        .control-btn.danger:hover { background-color: #dc2626; }
-        .control-btn.active { background-color: var(--accent-primary); }
-        .control-btn.muted { background-color: #f87171; }
     </style>
-<link rel="stylesheet" href="/index.css">
 
 
 
@@ -104,11 +112,11 @@
                 <button data-tab="dashboard" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 4.5a3 3 0 0 0-3 3v.75a.75.75 0 0 1-1.5 0v-.75a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5v.75a.75.75 0 0 1-1.5 0v-.75a3 3 0 0 0-3-3h-3Z"></path><path fill-rule="evenodd" d="M2.25 12c0-3.573 2.642-6.535 6.07-7.122A.75.75 0 0 1 9 5.628v12.744a.75.75 0 0 1-1.192.594C4.354 18.2 2.25 15.34 2.25 12ZM15 5.628a.75.75 0 0 0-1.192-.594C17.646 5.7 21.75 8.66 21.75 12c0 3.573-2.642 6.535-6.07 7.122A.75.75 0 0 0 15 18.372V5.628Z" clip-rule="evenodd"></path></svg> <span class="nav-text">Dashboard</span></button>
                 <button data-tab="id-card" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"></path><path fill-rule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v14.25c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 19.125V4.875ZM3 16.5c0 .207.168.375.375.375h17.25a.375.375 0 0 0 .375-.375V9.75A.75.75 0 0 0 20.25 9h-1.355a3 3 0 0 1-2.91-2.583A6 6 0 0 0 12 3.75c-1.61 0-3.094.633-4.186 1.667A3.001 3.001 0 0 1 4.905 9H3.75a.75.75 0 0 0-.75.75v6.75Z" clip-rule="evenodd"></path></svg> <span class="nav-text">My ID Card</span></button>
                 <button data-tab="homework" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.25 4.533A9.708 9.708 0 0 0 6 3.75a9.708 9.708 0 0 0-5.25.783V18a9.708 9.708 0 0 0 5.25.783a9.708 9.708 0 0 0 5.25-.783V4.533Z"></path><path d="M12.75 3.75a9.708 9.708 0 0 1 5.25.783V18a9.708 9.708 0 0 1-5.25.783a9.708 9.708 0 0 1-5.25-.783V4.533c.359-.092.73-.162 1.114-.211A9.73 9.73 0 0 1 8.25 3.75a9.73 9.73 0 0 1 4.5 0Z"></path></svg> <span class="nav-text">Homework</span></button>
-                <button data-tab="liveclass" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3h-15Zm-1.5 3a1.5 1.5 0 0 1 1.5-1.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5-1.5h-15a1.5 1.5 0 0 1-1.5-1.5v-9Z"></path><path d="M10.03 10.03a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-.75-.75a.75.75 0 1 1 1.06-1.06l.22.22 1.72-1.72a.75.75 0 0 1 1.06 0Zm6-2.25a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75Z"></path></svg> <span class="nav-text">Live Classes</span></button>
-                <button data-tab="attendance" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clip-rule="evenodd"></path></svg> <span class="nav-text">My Attendance</span></button>
-                <button data-tab="results" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 3.75a.75.75 0 0 1 .75.75v14.03l3.2-3.261a.75.75 0 1 1 1.07 1.05l-4.5 4.604a.75.75 0 0 1-1.07 0l-4.5-4.604a.75.75 0 1 1 1.07-1.05l3.2 3.261V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"></path></svg> <span class="nav-text">My Results</span></button>
-                <button data-tab="diary" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.348 2.595.341 1.24 1.518 1.905 2.66 1.905H6.44l4.5 4.5c.945.945 2.56.276 2.56-1.06V4.06Z"></path></svg> <span class="nav-text">School Diary</span></button>
-                <button data-tab="leave" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21.721 12.752a9.711 9.711 0 0 0-9.45-8.216.75.75 0 0 1-.614-1.425 11.211 11.211 0 0 1 11.439 9.544.75.75 0 0 1-1.375.397Z"></path><path d="M12.025 15.343a.75.75 0 1 0-1.05 1.05l2.25 2.25a.75.75 0 0 0 1.05 0l4.5-4.5a.75.75 0 0 0-1.05-1.05L13.5 15.688l-1.475-1.345Z"></path><path d="M3.75 21V9.75l7.5-5.325 7.5 5.325V21h-4.5v-6a1.5 1.5 0 0 0-3 0v6H3.75Z"></path></svg> <span class="nav-text">Apply for Leave</span></button>
+                <button data-tab="liveclass" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3h-15Zm-1.5 3a1.5 1.5 0 0 1 1.5-1.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5-1.5h-15a1.5 1.5 0 0 1-1.5-1.5v-9Z"></path><path d="M10.03 10.03a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-.75-.75a.75.75 0 1 1 1.06-1.06l.22.22 1.72-1.72a.75.75 0 0 1 1.06 0Zm6-2.25a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75Z"></path></svg> <span class="nav-text">Live Class</span></button>
+                <button data-tab="transport" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 18.75a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"></path><path fill-rule="evenodd" d="M8.625.75A3.375 3.375 0 0 0 5.25 4.125v15.75a3.375 3.375 0 0 0 3.375 3.375h6.75a3.375 3.375 0 0 0 3.375-3.375V4.125A3.375 3.375 0 0 0 15.375.75h-6.75ZM7.5 4.125a1.125 1.125 0 0 1 1.125-1.125h6.75a1.125 1.125 0 0 1 1.125 1.125v15.75a1.125 1.125 0 0 1-1.125 1.125h-6.75a1.125 1.125 0 0 1-1.125-1.125V4.125Z" clip-rule="evenodd"></path></svg> <span class="nav-text">Transport</span></button>
+                <button data-tab="results" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 3.75a.75.75 0 0 1 .75.75v14.03l3.2-3.261a.75.75 0 1 1 1.07 1.05l-4.5 4.604a.75.75 0 0 1-1.07 0l-4.5-4.604a.75.75 0 1 1 1.07-1.05l3.2 3.261V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"></path></svg> <span class="nav-text">Results</span></button>
+                <button data-tab="leave-application" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"><svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12.96 6.22a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 1 1-1.06-1.06L16.69 12l-3.73-3.72a.75.75 0 0 1 0-1.06ZM6.96 6.22a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 1 1-1.06-1.06L10.69 12 6.96 8.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path></svg><span class="nav-text">Leave Application</span></button>
+                <button data-tab="my-profile" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-gray-700"> <svg class="w-6 h-6 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"></path><path fill-rule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v14.25c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 19.125V4.875ZM3 16.5c0 .207.168.375.375.375h17.25a.375.375 0 0 0 .375-.375V9.75A.75.75 0 0 0 20.25 9h-1.355a3 3 0 0 1-2.91-2.583A6 6 0 0 0 12 3.75c-1.61 0-3.094.633-4.186 1.667A3.001 3.001 0 0 1 4.905 9H3.75a.75.75 0 0 0-.75.75v6.75Z" clip-rule="evenodd"></path></svg> <span class="nav-text">My Profile</span></button>
             </div>
             <div class="p-2 border-t mt-auto">
                 <button id="logout-btn" class="nav-button w-full flex items-center p-3 rounded-lg font-semibold text-red-600 hover:bg-red-50">
@@ -119,14 +127,13 @@
         </nav>
 
         <div class="flex-1 flex flex-col overflow-hidden">
-            <header class="flex justify-between items-center p-4 bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
+             <header class="flex justify-between items-center p-4 bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
                 <div class="flex items-center gap-4">
-                    <button id="menu-toggle" class="p-2 rounded-full hover:bg-gray-100 hidden md:block">
-                        <!-- Icon will be inserted by JS -->
-                    </button>
                     <h2 id="page-title" class="text-xl font-bold">Dashboard</h2>
                 </div>
-                <div id="student-info" class="text-right"></div>
+                <div class="flex items-center gap-4">
+                    <div id="student-info" class="text-right"></div>
+                </div>
             </header>
             <main class="flex-1 p-4 md:p-8 overflow-y-auto">
                 <div id="app-content-container"></div>
@@ -136,14 +143,50 @@
 
     <!-- Mobile Bottom Navigation -->
      <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 h-16 bg-white shadow-lg hidden z-50">
-        <button data-tab="dashboard" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 4.5a3 3 0 0 0-3 3v.75a.75.75 0 0 1-1.5 0v-.75a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5v.75a.75.75 0 0 1-1.5 0v-.75a3 3 0 0 0-3-3h-3Z"></path><path fill-rule="evenodd" d="M2.25 12c0-3.573 2.642-6.535 6.07-7.122A.75.75 0 0 1 9 5.628v12.744a.75.75 0 0 1-1.192.594C4.354 18.2 2.25 15.34 2.25 12ZM15 5.628a.75.75 0 0 0-1.192-.594C17.646 5.7 21.75 8.66 21.75 12c0 3.573-2.642 6.535-6.07 7.122A.75.75 0 0 0 15 18.372V5.628Z" clip-rule="evenodd"></path></svg> Dashboard</button>
-        <button data-tab="homework" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.25 4.533A9.708 9.708 0 0 0 6 3.75a9.708 9.708 0 0 0-5.25.783V18a9.708 9.708 0 0 0 5.25.783a9.708 9.708 0 0 0 5.25-.783V4.533Z"></path><path d="M12.75 3.75a9.708 9.708 0 0 1 5.25.783V18a9.708 9.708 0 0 1-5.25.783a9.708 9.708 0 0 1-5.25-.783V4.533c.359-.092.73-.162 1.114-.211A9.73 9.73 0 0 1 8.25 3.75a9.73 9.73 0 0 1 4.5 0Z"></path></svg> Homework</button>
-        <button data-tab="liveclass" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3h-15Zm-1.5 3a1.5 1.5 0 0 1 1.5-1.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5-1.5h-15a1.5 1.5 0 0 1-1.5-1.5v-9Z"></path><path d="M10.03 10.03a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-.75-.75a.75.75 0 1 1 1.06-1.06l.22.22 1.72-1.72a.75.75 0 0 1 1.06 0Zm6-2.25a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75Z"></path></svg> Classes</button>
-        <button data-tab="leave" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"><svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21.721 12.752a9.711 9.711 0 0 0-9.45-8.216.75.75 0 0 1-.614-1.425 11.211 11.211 0 0 1 11.439 9.544.75.75 0 0 1-1.375.397Z"></path><path d="M12.025 15.343a.75.75 0 1 0-1.05 1.05l2.25 2.25a.75.75 0 0 0 1.05 0l4.5-4.5a.75.75 0 0 0-1.05-1.05L13.5 15.688l-1.475-1.345Z"></path><path d="M3.75 21V9.75l7.5-5.325 7.5 5.325V21h-4.5v-6a1.5 1.5 0 0 0-3 0v6H3.75Z"></path></svg> Leave</button>
-        <button data-tab="id-card" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"> <svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"></path><path fill-rule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v14.25c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 19.125V4.875ZM3 16.5c0 .207.168.375.375.375h17.25a.375.375 0 0 0 .375-.375V9.75A.75.75 0 0 0 20.25 9h-1.355a3 3 0 0 1-2.91-2.583A6 6 0 0 0 12 3.75c-1.61 0-3.094.633-4.186 1.667A3.001 3.001 0 0 1 4.905 9H3.75a.75.75 0 0 0-.75.75v6.75Z" clip-rule="evenodd"></path></svg> Profile</button>
+        <button data-tab="dashboard" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"><svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 4.5a3 3 0 0 0-3 3v.75a.75.75 0 0 1-1.5 0v-.75a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5v.75a.75.75 0 0 1-1.5 0v-.75a3 3 0 0 0-3-3h-3Z"></path><path fill-rule="evenodd" d="M2.25 12c0-3.573 2.642-6.535 6.07-7.122A.75.75 0 0 1 9 5.628v12.744a.75.75 0 0 1-1.192.594C4.354 18.2 2.25 15.34 2.25 12ZM15 5.628a.75.75 0 0 0-1.192-.594C17.646 5.7 21.75 8.66 21.75 12c0 3.573-2.642 6.535-6.07 7.122A.75.75 0 0 0 15 18.372V5.628Z" clip-rule="evenodd"></path></svg>Dashboard</button>
+        <button data-tab="homework" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"><svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.25 4.533A9.708 9.708 0 0 0 6 3.75a9.708 9.708 0 0 0-5.25.783V18a9.708 9.708 0 0 0 5.25.783a9.708 9.708 0 0 0 5.25-.783V4.533Z"></path><path d="M12.75 3.75a9.708 9.708 0 0 1 5.25.783V18a9.708 9.708 0 0 1-5.25.783a9.708 9.708 0 0 1-5.25-.783V4.533c.359-.092.73-.162 1.114-.211A9.73 9.73 0 0 1 8.25 3.75a9.73 9.73 0 0 1 4.5 0Z"></path></svg>Homework</button>
+        <button data-tab="transport" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"><svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 18.75a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"></path><path fill-rule="evenodd" d="M8.625.75A3.375 3.375 0 0 0 5.25 4.125v15.75a3.375 3.375 0 0 0 3.375 3.375h6.75a3.375 3.375 0 0 0 3.375-3.375V4.125A3.375 3.375 0 0 0 15.375.75h-6.75ZM7.5 4.125a1.125 1.125 0 0 1 1.125-1.125h6.75a1.125 1.125 0 0 1 1.125 1.125v15.75a1.125 1.125 0 0 1-1.125 1.125h-6.75a1.125 1.125 0 0 1-1.125-1.125V4.125Z" clip-rule="evenodd"></path></svg>Transport</button>
+        <button data-tab="liveclass" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"><svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3h-15Zm-1.5 3a1.5 1.5 0 0 1 1.5-1.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5-1.5h-15a1.5 1.5 0 0 1-1.5-1.5v-9Z"></path><path d="M10.03 10.03a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-.75-.75a.75.75 0 1 1 1.06-1.06l.22.22 1.72-1.72a.75.75 0 0 1 1.06 0Zm6-2.25a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75Z"></path></svg>Live Class</button>
+        <button data-tab="my-profile" class="bottom-nav-btn flex-1 flex flex-col items-center justify-center text-xs"><svg class="w-6 h-6 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"></path><path fill-rule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v14.25c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 19.125V4.875ZM3 16.5c0 .207.168.375.375.375h17.25a.375.375 0 0 0 .375-.375V9.75A.75.75 0 0 0 20.25 9h-1.355a3 3 0 0 1-2.91-2.583A6 6 0 0 0 12 3.75c-1.61 0-3.094.633-4.186 1.667A3.001 3.001 0 0 1 4.905 9H3.75a.75.75 0 0 0-.75.75v6.75Z" clip-rule="evenodd"></path></svg>Profile</button>
+    </div>
+    <div id="toast" role="status" aria-live="polite"></div>
+
+    <!-- Modals -->
+    <div id="call-modal" class="modal">
+        <div class="modal-content text-center bg-gray-800 text-white p-8 rounded-2xl">
+            <div class="relative mx-auto mb-4 h-32 w-32">
+                <div class="absolute inset-0 rounded-full bg-gray-600 animate-ping opacity-50"></div>
+                <div class="absolute inset-2 rounded-full bg-gray-500 animate-ping opacity-50 delay-500"></div>
+                <div class="relative h-32 w-32 rounded-full bg-gray-700 flex items-center justify-center border-4 border-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 18.75a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"></path><path fill-rule="evenodd" d="M8.625.75A3.375 3.375 0 0 0 5.25 4.125v15.75a3.375 3.375 0 0 0 3.375 3.375h6.75a3.375 3.375 0 0 0 3.375-3.375V4.125A3.375 3.375 0 0 0 15.375.75h-6.75ZM7.5 4.125a1.125 1.125 0 0 1 1.125-1.125h6.75a1.125 1.125 0 0 1 1.125 1.125v15.75a1.125 1.125 0 0 1-1.125 1.125h-6.75a1.125 1.125 0 0 1-1.125-1.125V4.125Z" clip-rule="evenodd"></path></svg>
+                </div>
+            </div>
+            <p class="text-gray-300 text-lg">Ringing</p>
+            <h3 id="call-modal-title" class="text-3xl font-bold mt-1 mb-8">...</h3>
+            <button class="w-20 h-20 flex items-center justify-center mx-auto bg-red-600 text-white font-semibold rounded-full hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-400" onclick="endCall()">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path></svg>
+            </button>
+        </div>
     </div>
 
-    <div id="toast" style="position: fixed; bottom: 1.5rem; right: 1.5rem; background-color: #1f2937; color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; z-index: 1200; opacity: 0; transition: opacity .3s ease, transform .3s ease; transform: translateY(20px);"></div>
+    <div id="chat-modal" class="modal">
+        <div class="modal-content">
+            <div id="chat-header" class="flex justify-between items-center">
+                <span id="chat-header-title"></span>
+                <button type="button" onclick="document.getElementById('chat-modal').classList.remove('active')" class="p-2 rounded-full hover:bg-gray-100 -mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-gray-700">
+                        <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="chat-messages"></div>
+            <form id="chat-form">
+                <input type="text" id="chat-input" class="form-input flex-grow" placeholder="Type a message..." required="">
+                <button type="submit" class="bg-green-600 text-white p-3 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z"></path></svg></button>
+            </form>
+        </div>
+    </div>
+    <audio id="call-sound" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto" loop=""></audio>
 
 
 <script>
@@ -152,20 +195,26 @@
         databaseURL: "https://smart-school-e9f86-default-rtdb.asia-southeast1.firebasedatabase.app",
     };
 
-    // --- APP STATE (GLOBAL) ---
+    // --- APP STATE ---
     let db;
     let student = null;
-    let homework = [];
-    let liveClasses = [];
-    let attendanceRecords = [];
-    let results = [];
-    let announcements = [];
-    let leaveApplications = [];
-    let localStream = null;
-    let peerConnection; // For student-teacher WebRTC connection
+    let allStudents = [];
+    let allStaff = [];
+    let allHomework = [];
+    let allResults = [];
+    let allLiveClasses = [];
+    let allBuses = [];
+    let allBusTrips = [];
+    let allLeaves = [];
     let activeDBListeners = [];
+    let currentChatListener = null;
+    let countdownIntervalId = null;
+    let currentEtaInfo = null;
+    let isCountdownPaused = false;
+    let pausedRemainingMs = 0;
+
+
     const mainContent = document.getElementById('app-content-container');
-    const rtcConfig = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]};
 
     // --- UTILITIES ---
     function showToast(message) {
@@ -174,604 +223,632 @@
         t.textContent = message; t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3000);
     }
+    
     function logout() {
-        sessionStorage.removeItem('loggedInUser');
-        student = null; homework = []; liveClasses = []; attendanceRecords = []; results = []; announcements = []; leaveApplications = [];
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-            localStream = null;
-        }
-        if (peerConnection) {
-            peerConnection.close();
-            peerConnection = null;
-        }
         cleanupDBListeners();
+        sessionStorage.removeItem('loggedInUser');
+        student = null;
         document.getElementById('app-container').classList.add('hidden');
-        showLogin();
+        document.getElementById('login-overlay').classList.remove('hidden');
     }
+
     function cleanupDBListeners() {
+        if (countdownIntervalId) {
+            clearInterval(countdownIntervalId);
+            countdownIntervalId = null;
+            currentEtaInfo = null;
+            isCountdownPaused = false;
+            pausedRemainingMs = 0;
+        }
         activeDBListeners.forEach(l => l.ref.off(l.type, l.callback));
         activeDBListeners = [];
+        if (currentChatListener) {
+            currentChatListener.ref.off('value', currentChatListener.callback);
+            currentChatListener = null;
+        }
     }
     function addDBListener(ref, type, callback) {
         ref.on(type, callback);
         activeDBListeners.push({ ref, type, callback });
     }
 
+    function speak(text) {
+        if ('speechSynthesis' in window) {
+            speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            speechSynthesis.speak(utterance);
+        }
+    }
+
     // --- RENDER FUNCTIONS ---
     function renderDashboard() {
-        const upcomingHomeworkCount = homework.filter(h => new Date(h.dueDate) >= new Date()).length;
-        const totalRecords = attendanceRecords.filter(r => r.attendance && r.attendance[student.id]).length;
-        const presentRecords = attendanceRecords.filter(r => r.attendance && r.attendance[student.id] === 'Present').length;
-        const attendancePercent = totalRecords > 0 ? ((presentRecords / totalRecords) * 100).toFixed(0) : 100;
-        const latestAnnouncement = announcements.sort((a,b) => new Date(b.date) - new Date(a.date))[0];
+        const myHomework = allHomework.filter(h => h.className === student.className && h.section === student.section);
+        const newHomeworkCount = myHomework.filter(h => new Date(h.date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length; // Homework from last 7 days
+        const upcomingClasses = allLiveClasses.filter(lc => lc.className === student.className && lc.section === student.section && lc.status !== 'ended').length;
 
         mainContent.innerHTML = `
             <div class="space-y-8">
                 <div>
-                    <h3 class="text-2xl font-bold">Welcome, ${student.studentName}!</h3>
-                    <p class="text-gray-600 mt-1">Class: <strong>${student.className} - ${student.section}</strong> | Adm No: <strong>${student.admissionNumber}</strong></p>
+                    <h3 class="text-2xl font-bold">Welcome back, ${student.studentName}!</h3>
+                    <p class="text-gray-600 mt-1">Class: ${student.className}-${student.section}</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="card"><h3 class="font-semibold text-gray-500">Upcoming Homework</h3><p class="text-4xl font-extrabold mt-2">${upcomingHomeworkCount}</p></div>
-                    <div class="card"><h3 class="font-semibold text-gray-500">Overall Attendance</h3><p class="text-4xl font-extrabold text-green-600 mt-2">${attendancePercent}%</p></div>
-                    <div class="card"><h3 class="font-semibold text-gray-500">Recent Grade</h3><p class="text-4xl font-extrabold mt-2">A+</p></div>
-                </div>
-                ${latestAnnouncement ? `
-                <div class="card bg-gray-50">
-                    <h4 class="font-bold text-lg mb-2">Latest Announcement</h4>
-                    <div class="border-l-4 border-green-500 pl-4">
-                        <h5 class="font-bold">${latestAnnouncement.title}</h5>
-                        <p class="text-gray-700">${latestAnnouncement.message.substring(0, 150)}...</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card bg-yellow-50 border-yellow-200">
+                        <h3 class="font-semibold text-yellow-800">New Homework</h3>
+                        <p class="text-4xl font-extrabold text-yellow-900 mt-2">${newHomeworkCount}</p>
                     </div>
-                </div>` : ''}
+                    <div class="card bg-blue-50 border-blue-200">
+                        <h3 class="font-semibold text-blue-800">Upcoming Classes</h3>
+                        <p class="text-4xl font-extrabold text-blue-900 mt-2">${upcomingClasses}</p>
+                    </div>
+                </div>
             </div>
         `;
     }
 
-    function renderHomework() {
-        const sortedHomework = [...homework].sort((a,b) => new Date(b.date) - new Date(a.date));
-        mainContent.innerHTML = `<div class="space-y-4">${sortedHomework.map(h => `<div class="card"><h4 class="font-bold text-lg">${h.title} <span class="text-sm font-normal text-gray-500">(${h.subject})</span></h4><p class="text-sm text-gray-500">Assigned: ${new Date(h.date).toLocaleDateString()} | Due: ${h.dueDate}</p><p class="mt-2 whitespace-pre-wrap">${h.description}</p></div>`).join('') || '<div class="card text-center text-gray-500 py-8">No homework found.</div>'}</div>`;
-    }
-    
-    function renderLiveClass() {
-        mainContent.innerHTML = `<div id="live-class-list" class="space-y-4"></div>`;
-        const container = document.getElementById('live-class-list');
-
-        const liveClassesRef = db.ref('liveClasses');
-        addDBListener(liveClassesRef, 'value', (snapshot) => {
-            const allClasses = Object.values(snapshot.val() || {});
-            const myClasses = allClasses
-                .filter(lc => lc.className === student.className && lc.section === student.section)
-                .sort((a, b) => new Date(b.date + ' ' + b.startTime) - new Date(a.date + ' ' + a.startTime));
-
-            if (!container) return; 
-
-            const getStatusBadge = (status) => {
-                if (status === 'live') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Live</span>`;
-                if (status === 'ended') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Ended</span>`;
-                return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Scheduled</span>`;
-            };
-
-            container.innerHTML = myClasses.length > 0 ? myClasses.map(lc => {
-                const canJoin = lc.status === 'live';
-                return `
-                <div class="card">
-                     <div class="flex justify-between items-center">
-                        <div>
-                            <h4 class="font-bold text-lg">${lc.topic} <span class="text-base font-medium text-gray-500">(${lc.subject})</span></h4>
-                            <p class="text-sm text-gray-500">By ${lc.teacherName} | On: ${lc.date} at ${lc.startTime}</p>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            ${getStatusBadge(lc.status)}
-                            <button onclick="joinLiveClass('${lc.id}')" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400" ${!canJoin ? 'disabled' : ''}>Join Class</button>
-                        </div>
-                    </div>
-                </div>`
-            }).join('') : '<div class="card text-center text-gray-500 py-8">No live classes scheduled for you.</div>';
-        });
-    }
-
-    async function joinLiveClass(classId) {
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            const studentParticipant = { id: student.id, name: student.studentName, handRaised: false };
-            const classRef = db.ref(`liveClasses/${classId}`);
-            
-            await classRef.child(`participants/${student.id}`).set(studentParticipant);
-            classRef.child(`participants/${student.id}`).onDisconnect().remove();
-
-            renderStudentClassroomView(classId);
-            
-            const liveClass = liveClasses.find(lc => lc.id === classId);
-            initiatePeerConnection(classId, liveClass.teacherId);
-
-        } catch(err) {
-            console.error("Error joining class:", err);
-            showToast("Could not access camera/microphone. Please check permissions.");
-        }
-    }
-
-    async function leaveLiveClass(classId) {
-        const classroomView = document.getElementById('classroom-view');
-        if (classroomView) classroomView.remove();
-        document.getElementById('app-container').classList.remove('hidden');
-        document.getElementById('bottom-nav').classList.remove('hidden');
-
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-            localStream = null;
-        }
-        if(peerConnection) {
-            peerConnection.close();
-            peerConnection = null;
-        }
-        await db.ref(`liveClasses/${classId}/participants/${student.id}`).remove();
-        cleanupDBListeners();
-        setActiveTab('liveclass');
-    }
-    
-    async function initiatePeerConnection(classId, teacherId) {
-        peerConnection = new RTCPeerConnection(rtcConfig);
-        
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-        peerConnection.ontrack = event => {
-            const teacherVideo = document.getElementById('teacher-video');
-            if (teacherVideo) {
-                teacherVideo.srcObject = event.streams[0];
-                const placeholder = document.querySelector('.teacher-placeholder');
-                if (placeholder) placeholder.style.display = 'none';
-            }
-        };
-
-        const signalingRef = db.ref(`liveClasses/${classId}/signaling/${student.id}`);
-        peerConnection.onicecandidate = event => {
-            if (event.candidate) {
-                signalingRef.child('fromStudent/candidates').push(event.candidate.toJSON());
-            }
-        };
-
-        addDBListener(signalingRef.child('fromTeacher/offer'), 'value', async (snap) => {
-            const offer = snap.val();
-            if (offer && peerConnection.signalingState === "stable") {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                await signalingRef.child('fromStudent/answer').set({ type: answer.type, sdp: answer.sdp });
-            }
-        });
-
-        addDBListener(signalingRef.child('fromTeacher/candidates'), 'child_added', snap => {
-            const candidate = snap.val();
-            if (candidate && peerConnection.signalingState !== "closed") {
-                peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch(e => console.log(e));
-            }
-        });
-    }
-
-    function renderStudentClassroomView(classId) {
-        document.getElementById('app-container').classList.add('hidden');
-        document.getElementById('bottom-nav').classList.add('hidden');
-
-        const classroomEl = document.createElement('div');
-        classroomEl.id = 'classroom-view';
-        classroomEl.innerHTML = `
-            <div class="fixed inset-0 bg-gray-800 flex flex-col">
-                <div class="flex-1 bg-black flex items-center justify-center relative">
-                    <video id="teacher-video" autoplay playsinline class="h-full w-full object-contain"></video>
-                    <div class="teacher-placeholder absolute inset-0 flex flex-col items-center justify-center text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-24 h-24 text-gray-700"><path d="M11.7 2.81a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l.47.47.47-.47a.75.75 0 0 1 1.06 0l3.18 3.18a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-.47.47.47.47a.75.75 0 0 1 0 1.06l-3.18 3.18a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0l-.47-.47-.47.47a.75.75 0 0 1-1.06 0L8.81 16.2a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l.47-.47-.47-.47a.75.75 0 0 1 0-1.06l3.18-3.18Z" /></svg>
-                        <h3 class="text-xl font-bold mt-4">Waiting for teacher's video...</h3>
-                    </div>
-                    <div id="self-view-container" class="absolute top-4 right-4 w-32 h-24 md:w-48 md:h-36 rounded-lg overflow-hidden border-2 border-white/50 bg-black">
-                        <video id="my-video" autoplay playsinline muted class="h-full w-full object-cover transform -scale-x-100"></video>
-                        <div id="teacher-control-msg" class="absolute inset-0 bg-black/70 text-white text-xs text-center p-2 hidden items-center justify-center"></div>
-                    </div>
-                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 p-3 rounded-full flex gap-4 z-20">
-                        <button id="mic-btn" class="control-btn active"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8.25 4.5a3.75 3.75 0 1 1 7.5 0v8.25a3.75 3.75 0 1 1-7.5 0V4.5Z" /><path d="M6 15a.75.75 0 0 1 .75.75v.008c0 3.036 2.464 5.5 5.5 5.5s5.5-2.464 5.5-5.5v-.008a.75.75 0 0 1 1.5 0v.008a7 7 0 0 1-7 7s-7-3.134-7-7v-.008A.75.75 0 0 1 6 15Z" /></svg></button>
-                        <button id="video-btn" class="control-btn active"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-2.845l3.52 1.87a.75.75 0 0 0 1.23-.654V8.13a.75.75 0 0 0-1.23-.655L15.75 9.345V7.5a3 3 0 0 0-3-3H4.5Z" /></svg></button>
-                        <button id="screen-share-btn" class="control-btn" title="Share Screen"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21.75 12.75a.75.75 0 0 0-1.5 0v2.25H3.75v-2.25a.75.75 0 0 0-1.5 0v2.25A2.25 2.25 0 0 0 4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V12.75Z" /><path d="m12 14.25-4.5-4.5.75-.75L11.25 12v-8.25h1.5V12l3-3 .75.75-4.5 4.5Z" /></svg></button>
-                        <button id="raise-hand-btn" class="control-btn"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M14.25 10.5A2.25 2.25 0 0 1 12 12.75v-2.25a2.25 2.25 0 0 1 2.25-2.25Z" /><path fill-rule="evenodd" d="M14.25 2.25a.75.75 0 0 1 .75.75v3.44l1.72-.86a.75.75 0 1 1 .76 1.314l-2.004 1.002a3.75 3.75 0 0 1-3.738 0l-2.003-1.002a.75.75 0 1 1 .76-1.315l1.72.861V3a.75.75 0 0 1 .75-.75Zm-3 9.75a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5ZM12 12A1.5 1.5 0 1 1 12 9a1.5 1.5 0 0 1 0 3Z" clip-rule="evenodd" /></svg></button>
-                        <button id="leave-class-btn" class="control-btn danger"><svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.25 5.25a.75.75 0 0 0-1.5 0v4.32L6.873 7.72a.75.75 0 0 0-1.054 1.07l1.9 1.85-1.9 1.85a.75.75 0 1 0 1.054 1.07L8.75 11.68v4.57a.75.75 0 0 0 1.5 0v-4.57l1.877 1.82a.75.75 0 1 0 1.054-1.07l-1.9-1.85 1.9-1.85a.75.75 0 0 0-1.054-1.07L10.25 9.57V5.25Z" /></svg></button>
-                    </div>
+    function renderIdCard() {
+        mainContent.innerHTML = `
+            <div class="max-w-sm mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div class="bg-green-600 p-4 text-center text-white">
+                    <h2 class="text-xl font-bold">Navrose Smart School</h2>
+                    <p class="text-sm">Student Identity Card</p>
                 </div>
-            </div>`;
-        document.body.appendChild(classroomEl);
-
-        document.getElementById('my-video').srcObject = localStream;
-        document.getElementById('leave-class-btn').onclick = () => leaveLiveClass(classId);
+                <div class="p-6 text-center">
+                    <div id="qrcode" class="flex justify-center p-4 bg-white border rounded-lg mb-4"></div>
+                    <h3 class="text-2xl font-bold">${student.studentName}</h3>
+                    <p class="text-gray-600">Admission No: ${student.admissionNumber}</p>
+                    <p class="text-gray-600">Class: ${student.className}-${student.section}</p>
+                    <p class="text-gray-600">Father's Name: ${student.fatherName}</p>
+                    <p class="text-gray-600">Mobile: ${student.mobile}</p>
+                </div>
+            </div>
+        `;
+        new QRCode(document.getElementById("qrcode"), { text: student.id, width: 128, height: 128 });
+    }
+    
+    function renderHomework() {
+        const myHomework = allHomework
+            .filter(h => h.className === student.className && h.section === student.section)
+            .sort((a,b) => new Date(b.dueDate) - new Date(a.dueDate));
         
-        cleanupDBListeners();
-
-        // Listener for teacher controls
-        const controlsRef = db.ref(`liveClasses/${classId}/controls/${student.id}`);
-        addDBListener(controlsRef, 'value', snap => {
-            const controls = snap.val() || {};
-            const micBtn = document.getElementById('mic-btn');
-            const videoBtn = document.getElementById('video-btn');
-            const controlMsg = document.getElementById('teacher-control-msg');
-
-            if (!micBtn || !videoBtn || !localStream) return;
-
-            // Handle Mic
-            if(controls.micMuted) {
-                localStream.getAudioTracks()[0].enabled = false;
-                micBtn.classList.add('muted');
-                micBtn.disabled = true;
-                controlMsg.textContent = "Teacher muted you.";
-                controlMsg.classList.remove('hidden');
-                controlMsg.classList.add('flex');
-            } else {
-                localStream.getAudioTracks()[0].enabled = true;
-                micBtn.classList.remove('muted');
-                micBtn.disabled = false;
-            }
-
-            // Handle Video
-            if(controls.videoOff) {
-                localStream.getVideoTracks()[0].enabled = false;
-                videoBtn.classList.remove('active');
-                videoBtn.disabled = true;
-                controlMsg.textContent = controls.micMuted ? "Mic & Video disabled" : "Teacher disabled your video.";
-                controlMsg.classList.remove('hidden');
-                controlMsg.classList.add('flex');
-            } else {
-                localStream.getVideoTracks()[0].enabled = true;
-                videoBtn.classList.add('active');
-                videoBtn.disabled = false;
-            }
-
-            if (!controls.micMuted && !controls.videoOff) {
-                controlMsg.classList.add('hidden');
-                controlMsg.classList.remove('flex');
-            }
-        });
-
-
-        // Listener for class status
-        const statusRef = db.ref(`liveClasses/${classId}/status`);
-        addDBListener(statusRef, 'value', snap => {
-            if (snap.val() === 'ended') {
-                showToast("The teacher has ended the class.");
-                leaveLiveClass(classId);
-            }
-        });
+        const homeworkList = myHomework.length > 0 ? myHomework.map(h => `
+            <div class="card">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-lg font-bold">${h.title}</h3>
+                        <p class="text-sm font-semibold text-gray-500">${h.subject}</p>
+                    </div>
+                    <p class="text-sm text-red-600 font-semibold">Due: ${h.dueDate}</p>
+                </div>
+                <p class="mt-4 text-gray-700">${h.description}</p>
+            </div>
+        `).join('') : '<p class="text-center text-gray-500 py-8">No homework assigned.</p>';
         
-        document.getElementById('mic-btn').addEventListener('click', (e) => {
-            localStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
-            e.currentTarget.classList.toggle('active', localStream.getAudioTracks()[0].enabled);
-            e.currentTarget.classList.toggle('muted', !localStream.getAudioTracks()[0].enabled);
-        });
-        document.getElementById('video-btn').addEventListener('click', (e) => {
-            localStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
-            e.currentTarget.classList.toggle('active', localStream.getVideoTracks()[0].enabled);
-        });
-        document.getElementById('raise-hand-btn').addEventListener('click', (e) => {
-            const btn = e.currentTarget;
-            const handRaised = !btn.classList.contains('active');
-            db.ref(`liveClasses/${classId}/participants/${student.id}/handRaised`).set(handRaised);
-            btn.classList.toggle('active', handRaised);
-        });
-
-        // --- Screen Sharing Logic ---
-        let isScreenSharing = false;
-        let screenStream = null;
-        const myVideoEl = document.getElementById('my-video');
-        const cameraVideoTrack = localStream.getVideoTracks()[0];
-
-        const toggleScreenShare = async () => {
-            if (isScreenSharing) {
-                screenStream.getTracks().forEach(track => track.stop());
-                myVideoEl.srcObject = localStream;
-                myVideoEl.classList.toggle('-scale-x-100', true);
-                
-                const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-                if (sender) await sender.replaceTrack(cameraVideoTrack);
-                
-                isScreenSharing = false;
-                screenStream = null;
-                document.getElementById('screen-share-btn').classList.remove('active');
-            } else {
-                try {
-                    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                    const screenTrack = screenStream.getVideoTracks()[0];
-                    myVideoEl.srcObject = screenStream;
-                    myVideoEl.classList.toggle('-scale-x-100', false);
-
-                    const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-                    if (sender) await sender.replaceTrack(screenTrack);
-                    
-                    screenTrack.onended = () => { if(isScreenSharing) toggleScreenShare(); };
-                    isScreenSharing = true;
-                    document.getElementById('screen-share-btn').classList.add('active');
-                } catch (err) {
-                    console.error("Screen share error:", err);
-                    showToast("Could not start screen sharing.");
-                }
-            }
-        };
-        document.getElementById('screen-share-btn').onclick = toggleScreenShare;
+        mainContent.innerHTML = `<div class="space-y-4">${homeworkList}</div>`;
     }
 
-    function renderAttendance() {
-        const today = new Date();
-        let currentMonth = today.getMonth();
-        let currentYear = today.getFullYear();
-        
+    function renderTransport() {
+        if (!student.transportInfo || !student.transportInfo.busId) {
+            mainContent.innerHTML = `<div class="card text-center"><p class="text-gray-600">You are not currently assigned to a bus route. Please contact the transport manager.</p></div>`;
+            return;
+        }
+
         mainContent.innerHTML = `
             <div class="card">
-                 <div id="calendar-header" class="flex justify-between items-center mb-4">
-                    <button id="prev-month" class="p-2 rounded-full hover:bg-gray-100">&lt;</button>
-                    <h3 id="month-year" class="text-xl font-bold"></h3>
-                    <button id="next-month" class="p-2 rounded-full hover:bg-gray-100">&gt;</button>
+                <h3 class="text-xl font-bold mb-4">Live Bus Tracking</h3>
+                <div id="transport-status-container" class="space-y-4">
+                    <p class="text-center p-8 text-gray-500">Connecting to bus...</p>
                 </div>
-                <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
-                <div class="flex justify-center gap-4 mt-4 text-sm"><span class="flex items-center gap-2"><div class="w-3 h-3 bg-green-200 rounded-full"></div>Present</span><span class="flex items-center gap-2"><div class="w-3 h-3 bg-red-200 rounded-full"></div>Absent</span><span class="flex items-center gap-2"><div class="w-3 h-3 bg-yellow-200 rounded-full"></div>Leave</span></div>
             </div>
         `;
 
-        const updateCalendar = () => generateCalendar(currentYear, currentMonth);
+        const busId = student.transportInfo.busId;
+        const bus = allBuses.find(b => b.id === busId);
+        
+        if (!bus) {
+            document.getElementById('transport-status-container').innerHTML = `<p class="text-center p-8 text-red-500">Error: Could not find details for your assigned bus.</p>`;
+            return;
+        }
+        const driverId = bus.assignedDriverId;
+        const driver = allStaff.find(s => s.id === driverId);
+        
+        let liveData = { bus, driver, tripId: null, location: null, boardingInfo: null, dropOffInfo: null, etaInfo: null, liveStatus: 'On Way', tripType: null };
+        let innerListeners = [];
 
-        document.getElementById('prev-month').addEventListener('click', () => {
-            currentMonth--;
-            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-            updateCalendar();
-        });
-        document.getElementById('next-month').addEventListener('click', () => {
-            currentMonth++;
-            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-            updateCalendar();
-        });
+        const renderCurrentStatus = () => {
+            renderTransportStatus(liveData);
+        };
 
-        updateCalendar();
+        const cleanupInnerListeners = () => {
+            innerListeners.forEach(l => l.ref.off(l.type, l.callback));
+            innerListeners = [];
+        };
+
+        addDBListener(db.ref(`buses/${busId}/activeTripId`), 'value', tripIdSnap => {
+            cleanupInnerListeners();
+            if (countdownIntervalId) clearInterval(countdownIntervalId);
+            
+            const activeTripId = tripIdSnap.val();
+            liveData = { ...liveData, tripId: activeTripId, location: null, boardingInfo: null, dropOffInfo: null, etaInfo: null, liveStatus: 'On Way', tripType: null };
+
+            if (!activeTripId) {
+                renderCurrentStatus(); 
+                return;
+            }
+
+            const basePath = db.ref(`busTrips/${activeTripId}`);
+
+            const addInnerListener = (path, key) => {
+                const ref = basePath.child(path);
+                const callback = snapshot => { liveData[key] = snapshot.val(); renderCurrentStatus(); };
+                ref.on('value', callback);
+                innerListeners.push({ ref, type: 'value', callback });
+            };
+
+            addInnerListener('tripType', 'tripType');
+            addInnerListener(`boardedStudents/${student.id}`, 'boardingInfo');
+            addInnerListener(`droppedOffStudents/${student.id}`, 'dropOffInfo');
+            addInnerListener(`studentETAs/${student.id}`, 'etaInfo');
+            addInnerListener('liveStatus', 'liveStatus');
+
+            const locationRef = db.ref(`busLocations/${busId}`);
+            const locationCallback = locationSnap => { liveData.location = locationSnap.val(); renderCurrentStatus(); };
+            locationRef.on('value', locationCallback);
+            innerListeners.push({ ref: locationRef, type: 'value', callback: locationCallback });
+            
+            const announcementRef = db.ref(`busAnnouncements/${activeTripId}`);
+            const announcementCallback = snapshot => {
+                const announcement = snapshot.val();
+                if (announcement && announcement.message) {
+                    showToast(`Bus Announcement: ${announcement.message}`);
+                    if (announcement.voice && 'speechSynthesis' in window) {
+                        speak(announcement.message);
+                    }
+                }
+            };
+            announcementRef.limitToLast(1).on('child_added', announcementCallback);
+            innerListeners.push({ ref: announcementRef, type: 'child_added', callback: announcementCallback });
+        });
     }
 
-    function generateCalendar(year, month) {
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        document.getElementById('month-year').textContent = `${monthNames[month]} ${year}`;
-        
-        const grid = document.getElementById('calendar-grid');
-        grid.innerHTML = '';
-        
-        ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(day => {
-            grid.innerHTML += `<div class="font-semibold text-sm text-gray-500 p-2">${day}</div>`;
-        });
+    function renderTransportStatus({ bus, tripId, location, boardingInfo, dropOffInfo, driver, etaInfo, liveStatus, tripType }) {
+        const container = document.getElementById('transport-status-container');
+        if (!container) return;
+    
+        const commsHTML = driver ? `<div class="mt-6 flex flex-col md:flex-row gap-4 justify-center">
+            <button onclick="openChatWithDriver('${driver.id}', '${driver.staffName}')" class="py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Message Driver</button>
+            <button onclick="callDriver('${driver.id}', '${driver.staffName}')" class="py-3 px-6 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">Call Driver</button>
+        </div>` : '';
+    
+        const tripTypeText = tripType === 'pickup' ? 'Morning Trip (to School)' : (tripType === 'drop' ? 'Afternoon Trip (to Home)' : 'Trip Active');
 
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        container.innerHTML = `
+            <p class="text-lg font-semibold">Bus: ${bus.busNumber}</p>
+            <p class="text-lg font-semibold">Your Stop: ${student.transportInfo.stopName}</p>
+            <div id="live-status-section" class="mt-4 p-4 bg-blue-50 border-blue-200 rounded-lg text-center">
+                 <p class="text-lg">Trip Type: <span class="font-bold">${tripTypeText}</span></p>
+                 <p class="text-lg">Bus Status: <span id="live-bus-status" class="font-bold">${liveStatus}</span></p>
+            </div>
+            <div id="eta-section" class="mt-4"></div>
+            <div id="boarding-section" class="mt-4"></div>
+            ${commsHTML}
+        `;
 
-        for (let i = 0; i < firstDay; i++) {
-            grid.innerHTML += '<div></div>';
+        const etaContainer = document.getElementById('eta-section');
+        const boardingContainer = document.getElementById('boarding-section');
+
+        let showCountdown = false;
+        let statusHTML = '';
+        let boardingHTML = '';
+
+        if (tripType === 'drop') {
+            if (dropOffInfo) {
+                const dropTime = new Date(dropOffInfo.droppedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                statusHTML = `<p class="text-2xl font-bold text-blue-800">Dropped Off Successfully</p><p class="text-gray-600">At ${dropTime}</p>`;
+                boardingHTML = `<p class="text-lg font-semibold text-blue-700">Trip Completed</p>`;
+            } else if (boardingInfo) {
+                showCountdown = true;
+                boardingHTML = `<p class="text-lg font-semibold text-green-700">On the way Home</p>`;
+            } else if(tripId) {
+                statusHTML = `<p class="text-2xl font-bold text-gray-700">Not on Bus</p><p class="text-gray-500">Student was not on the bus for the afternoon trip.</p>`;
+                boardingHTML = `<p class="text-lg font-semibold text-gray-600">Absent from Drop Trip</p>`;
+            }
+        } else if (tripType === 'pickup') {
+             if (boardingInfo) {
+                statusHTML = `<p class="text-2xl font-bold text-green-700">On the way to School</p>`;
+                boardingHTML = `<p class="text-lg font-semibold text-green-700">Boarded Successfully</p>`;
+             } else {
+                showCountdown = true;
+                boardingHTML = `<p class="text-lg font-semibold text-yellow-700">Waiting for Pickup</p>`;
+             }
         }
 
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const record = attendanceRecords.find(r => r.date === dateStr);
-            const status = record?.attendance?.[student.id];
+        if (!tripId) {
+             statusHTML = `<p class="text-2xl font-bold text-gray-700">Trip Not Active</p>`;
+             boardingHTML = `<p class="text-lg font-semibold text-gray-600">No active trip</p>`;
+        }
+        
+        boardingContainer.innerHTML = `<div class="p-4 bg-gray-100 border-gray-200 rounded-lg text-center">${boardingHTML}</div>`;
+
+        if (showCountdown && etaInfo && (!currentEtaInfo || etaInfo.setAt !== currentEtaInfo.setAt)) {
+            currentEtaInfo = etaInfo;
+            if (countdownIntervalId) clearInterval(countdownIntervalId);
+            isCountdownPaused = false;
+    
+            const targetTime = etaInfo.setAt + (etaInfo.eta * 60 * 1000);
+            const initialTotalSeconds = etaInfo.eta * 60;
+            let notificationState = { firstWarning: false, finalWarning: false };
+    
+            const etaTitle = tripType === 'drop' ? 'Bus Arriving Home In' : 'Bus Arriving for Pickup In';
+
+            etaContainer.innerHTML = `
+                <div id="countdown-display" class="p-4 rounded-lg text-white text-center transition-colors duration-500">
+                    <p class="text-sm uppercase tracking-wider">${etaTitle}</p>
+                    <p id="countdown-timer" class="text-5xl font-extrabold tracking-tight">--:--</p>
+                </div>
+            `;
             
-            let statusClass = 'bg-gray-100';
-            if(status === 'Present') statusClass = 'bg-green-200';
-            else if(status === 'Absent') statusClass = 'bg-red-200';
-            else if(status === 'Leave') statusClass = 'bg-yellow-200';
-            
-            grid.innerHTML += `<div class="p-2 rounded-full ${statusClass}">${day}</div>`;
+            const timerEl = document.getElementById('countdown-timer');
+            const displayEl = document.getElementById('countdown-display');
+    
+            const updateCountdown = () => {
+                if (!timerEl || !displayEl || isCountdownPaused) {
+                    if(isCountdownPaused && timerEl) {
+                        timerEl.innerHTML = timerEl.textContent.split(' ')[0] + ' ⏸️';
+                    }
+                    clearInterval(countdownIntervalId);
+                    return;
+                }
+                const remainingMs = targetTime - Date.now();
+                if (remainingMs <= 0) {
+                    clearInterval(countdownIntervalId);
+                    countdownIntervalId = null;
+                    currentEtaInfo = null;
+
+                    let arrivalMessage = "Bus has arrived!";
+                    if(tripType === 'drop') {
+                        displayEl.innerHTML = `<p class="text-2xl font-bold">Bus has arrived at your stop!</p><p class="text-sm">Please receive ${student.studentName}.</p>`;
+                        arrivalMessage = `The bus has arrived at your stop. Please pick up ${student.studentName}.`;
+                    } else {
+                        displayEl.innerHTML = `<p class="text-2xl font-bold">Bus has arrived for pickup!</p>`;
+                        arrivalMessage = `Your bus has arrived for pickup!`;
+                    }
+                    
+                    displayEl.classList.remove('bg-red-500', 'bg-yellow-500');
+                    displayEl.classList.add('bg-green-500');
+                    speak(arrivalMessage);
+                    return;
+                }
+    
+                const remainingSeconds = Math.round(remainingMs / 1000);
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = remainingSeconds % 60;
+                timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                const timeRatio = remainingSeconds / initialTotalSeconds;
+                displayEl.classList.remove('bg-red-500', 'bg-yellow-500', 'bg-green-500');
+                if (timeRatio > 2/3) displayEl.classList.add('bg-red-500');
+                else if (timeRatio > 1/3) displayEl.classList.add('bg-yellow-500');
+                else displayEl.classList.add('bg-green-500');
+    
+                const firstWarningThreshold = initialTotalSeconds * (2/3);
+                const finalWarningThreshold = 120;
+    
+                if (remainingSeconds <= finalWarningThreshold && !notificationState.finalWarning) {
+                    if (tripType === 'drop') {
+                        speak(`${student.studentName} is about to be dropped off. Please be ready to receive them.`);
+                    } else {
+                        speak(`Your bus is about to arrive for pickup. Please be ready.`);
+                    }
+                    notificationState.finalWarning = true;
+                } else if (remainingSeconds <= firstWarningThreshold && !notificationState.firstWarning) {
+                    if (tripType === 'drop') {
+                        speak(`Attention, we are on our way to drop off ${student.studentName}.`);
+                    } else {
+                        speak(`Attention ${student.studentName}, your bus is approaching your stop.`);
+                    }
+                    notificationState.firstWarning = true;
+                }
+            };
+    
+            if (liveStatus === 'On Way') {
+                countdownIntervalId = setInterval(updateCountdown, 1000);
+                updateCountdown();
+            } else {
+                 updateCountdown(); // run once to display time
+                 if (timerEl) timerEl.innerHTML += ' ⏸️';
+            }
+        } else if (!showCountdown) {
+            if (countdownIntervalId) clearInterval(countdownIntervalId);
+            currentEtaInfo = null;
+            if (statusHTML) {
+                 etaContainer.innerHTML = `<div class="p-4 bg-gray-100 rounded-lg text-center">${statusHTML}</div>`;
+            } else {
+                etaContainer.innerHTML = '';
+            }
+        }
+        
+        // Handle pause and resume based on liveStatus
+        if (liveStatus === 'Stopped in Traffic' && countdownIntervalId && !isCountdownPaused) {
+            const targetTime = currentEtaInfo.setAt + (currentEtaInfo.eta * 60 * 1000);
+            pausedRemainingMs = targetTime - Date.now();
+            clearInterval(countdownIntervalId);
+            countdownIntervalId = null;
+            isCountdownPaused = true;
+            const timerEl = document.getElementById('countdown-timer');
+            if (timerEl) timerEl.innerHTML += ' ⏸️';
+        } else if (liveStatus === 'On Way' && isCountdownPaused) {
+            isCountdownPaused = false;
+            if (currentEtaInfo) {
+                // To restart, we trick the logic into thinking it's a new ETA
+                const newEtaInfo = { ...currentEtaInfo, setAt: Date.now() };
+                const remainingMinutes = Math.max(0, pausedRemainingMs / (60 * 1000));
+                newEtaInfo.eta = remainingMinutes;
+                currentEtaInfo = null; // Force re-initialization
+                renderTransportStatus({bus, tripId, location, boardingInfo, dropOffInfo, driver, etaInfo: newEtaInfo, liveStatus, tripType});
+            }
         }
     }
 
     function renderResults() {
-        mainContent.innerHTML = `<div class="space-y-4">${results.map(res => `<div class="card"><h4 class="font-bold text-lg">${res.examType}</h4><div class="overflow-x-auto mt-2"><table class="w-full text-sm"><thead><tr class="border-b"><th class="p-2 text-left">Subject</th><th class="p-2 text-right">Marks (100)</th></tr></thead><tbody>${Object.entries(res.results[student.id] || {}).map(([sub, marks]) => `<tr><td class="p-2">${sub}</td><td class="p-2 text-right font-semibold">${marks}</td></tr>`).join('')}</tbody></table></div></div>`).join('') || '<div class="card text-center text-gray-500 py-8">No results have been published yet.</div>'}</div>`;
-    }
+        const myResults = allResults.filter(r => r.className === student.className && r.section === student.section);
+        const resultsByExam = myResults.reduce((acc, curr) => {
+            (acc[curr.examType] = acc[curr.examType] || []).push(curr);
+            return acc;
+        }, {});
 
-    function renderDiary() {
-        const sortedAnnouncements = [...announcements].sort((a,b) => new Date(b.date) - new Date(a.date));
-        mainContent.innerHTML = `<div class="space-y-4">${sortedAnnouncements.map(a => `<div class="card"><h4 class="font-bold text-lg">${a.title}</h4><p class="text-sm text-gray-500">Posted on: ${new Date(a.date).toLocaleDateString()}</p><p class="mt-2 whitespace-pre-wrap">${a.message}</p></div>`).join('') || '<div class="card text-center text-gray-500 py-8">No announcements found.</div>'}</div>`;
-    }
+        if (Object.keys(resultsByExam).length === 0) {
+            mainContent.innerHTML = `<div class="card text-center"><p>Your results have not been published yet.</p></div>`;
+            return;
+        }
 
-    function renderMyIDCard() {
-        mainContent.innerHTML = `
-            <div class="max-w-md mx-auto card text-center">
-                 <h3 class="text-2xl font-bold">${student.studentName}</h3>
-                 <p class="text-gray-600">Class: ${student.className} - ${student.section}</p>
-                 <p class="text-gray-600 mb-6">Admission No: ${student.admissionNumber}</p>
-                 <div id="qrcode" class="flex justify-center p-4 bg-white border rounded-lg"></div>
-                 <p class="mt-4 text-sm text-gray-500">Show this QR code to your teacher for attendance.</p>
+        mainContent.innerHTML = Object.entries(resultsByExam).map(([examType, results]) => `
+            <div class="card mb-6">
+                <h3 class="text-xl font-bold mb-4">${examType}</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50"><tr class="border-b"><th class="p-3">Subject</th><th class="p-3">Marks Obtained</th></tr></thead>
+                        <tbody>
+                            ${results.map(r => `
+                                <tr class="border-b">
+                                    <td class="p-3 font-semibold">${r.subject}</td>
+                                    <td class="p-3">${r.results[student.id] || 'N/A'}</td>
+                                </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        `;
-
-        new QRCode(document.getElementById("qrcode"), {
-            text: student.id,
-            width: 256,
-            height: 256,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
+        `).join('');
     }
 
-    function renderLeaveApplication() {
-        const myLeaveApps = leaveApplications
-            .filter(app => app.studentId === student.id)
-            .sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated));
-        
+    function renderLeaveApplication() { 
+        const myLeaves = allLeaves.filter(l => l.applicantId === student.id).sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
         const getStatusBadge = (status) => {
-            if (status === 'Approved') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approved</span>`;
-            if (status === 'Rejected') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>`;
-            return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>`;
+            if (status === 'Approved') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">${status}</span>`;
+            if (status === 'Rejected') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">${status}</span>`;
+            return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">${status}</span>`;
         };
 
-        const historyRows = myLeaveApps.map(app => `
-            <tr class="border-b">
-                <td class="p-3">${app.startDate} to ${app.endDate}</td>
-                <td class="p-3">${app.reason}</td>
-                <td class="p-3">${getStatusBadge(app.status)}</td>
-            </tr>
-        `).join('');
-
         mainContent.innerHTML = `
-            <div class="space-y-6">
-                <div class="card">
-                    <h3 class="text-xl font-bold mb-4">Apply for Leave</h3>
+            <div class="card">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">My Leave Applications</h3>
+                    <button id="apply-leave-btn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg">Apply for Leave</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead><tr class="border-b"><th class="p-3">Dates</th><th class="p-3">Reason</th><th class="p-3">Status</th></tr></thead>
+                        <tbody>
+                            ${myLeaves.length > 0 ? myLeaves.map(leave => `
+                            <tr class="border-b">
+                                <td class="p-3">${leave.startDate} to ${leave.endDate}</td>
+                                <td class="p-3">${leave.reason}</td>
+                                <td class="p-3">${getStatusBadge(leave.status)}</td>
+                            </tr>`).join('') : `<tr><td colspan="3" class="text-center p-8 text-gray-500">No leave applications found.</td></tr>`}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        
+        document.getElementById('apply-leave-btn').addEventListener('click', () => {
+             const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3 class="text-xl font-bold mb-4">New Leave Application</h3>
                     <form id="leave-form" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="leave-start-date" class="block text-sm font-medium text-gray-700">Start Date</label>
-                                <input type="date" id="leave-start-date" class="form-input mt-1" required>
-                            </div>
-                            <div>
-                                <label for="leave-end-date" class="block text-sm font-medium text-gray-700">End Date</label>
-                                <input type="date" id="leave-end-date" class="form-input mt-1" required>
-                            </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label>Start Date</label><input type="date" id="start-date" class="form-input mt-1" required></div>
+                            <div><label>End Date</label><input type="date" id="end-date" class="form-input mt-1" required></div>
                         </div>
-                        <div>
-                            <label for="leave-reason" class="block text-sm font-medium text-gray-700">Reason for Leave</label>
-                            <textarea id="leave-reason" rows="3" class="form-textarea mt-1" required></textarea>
-                        </div>
-                        <div class="flex justify-end pt-2">
-                            <button type="submit" class="w-full md:w-auto py-2 px-6 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg">Submit Application</button>
+                        <div><label>Reason</label><textarea id="reason" class="form-textarea mt-1" rows="4" required></textarea></div>
+                        <div class="flex justify-end gap-3 pt-2">
+                            <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg" onclick="this.closest('.modal').remove()">Cancel</button>
+                            <button type="submit" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg">Submit</button>
                         </div>
                     </form>
-                </div>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.querySelector('#leave-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const leaveId = Date.now().toString();
+                const leaveData = {
+                    id: leaveId, applicantId: student.id, applicantName: student.studentName,
+                    applicantType: 'student',
+                    startDate: document.getElementById('start-date').value,
+                    endDate: document.getElementById('end-date').value,
+                    reason: document.getElementById('reason').value,
+                    status: 'Pending', submittedAt: new Date().toISOString()
+                };
+                await db.ref('leaves/' + leaveId).set(leaveData);
+                allLeaves.push(leaveData);
+                showToast("Leave application submitted.");
+                renderLeaveApplication();
+                modal.remove();
+            });
+        });
+    }
 
-                <div class="card">
-                    <h3 class="text-xl font-bold mb-4">My Leave History</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b">
-                                    <th class="p-3 text-left font-semibold text-gray-600">Dates</th>
-                                    <th class="p-3 text-left font-semibold text-gray-600">Reason</th>
-                                    <th class="p-3 text-left font-semibold text-gray-600">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${historyRows || `<tr><td colspan="3" class="text-center p-8 text-gray-500">You have not applied for any leave.</td></tr>`}
-                            </tbody>
-                        </table>
+    function renderMyProfile() { 
+        mainContent.innerHTML = `
+        <div class="card max-w-lg mx-auto">
+            <h3 class="text-2xl font-bold text-center mb-6">${student.studentName}</h3>
+            <div class="space-y-3 text-lg">
+                <div class="flex justify-between"><span class="font-semibold text-gray-600">Admission No:</span><span>${student.admissionNumber}</span></div>
+                <div class="flex justify-between"><span class="font-semibold text-gray-600">Class:</span><span>${student.className}-${student.section}</span></div>
+                <div class="flex justify-between"><span class="font-semibold text-gray-600">Father's Name:</span><span>${student.fatherName}</span></div>
+                <div class="flex justify-between"><span class="font-semibold text-gray-600">Mobile:</span><span>${student.mobile}</span></div>
+                <div class="pt-2"><p class="font-semibold text-gray-600">Address:</p><p>${student.address}</p></div>
+            </div>
+        </div>`;
+    }
+
+    function renderLiveClass() { 
+        const myLiveClasses = allLiveClasses
+            .filter(lc => lc.className === student.className && lc.section === student.section)
+            .sort((a,b) => new Date(b.date + ' ' + b.startTime) - new Date(a.date + ' ' + a.startTime));
+        
+        const getStatusBadge = (status) => {
+            if (status === 'live') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Live</span>`;
+            if (status === 'ended') return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Ended</span>`;
+            return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Scheduled</span>`;
+        };
+
+        const classList = myLiveClasses.length > 0 ? myLiveClasses.map(lc => `
+            <div class="card">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-bold">${lc.topic}</h3>
+                        <p class="text-sm font-semibold text-gray-500">${lc.subject} - by ${lc.teacherName}</p>
+                        <p class="text-sm text-gray-500">${lc.date} at ${lc.startTime}</p>
                     </div>
+                    <div>${getStatusBadge(lc.status)}</div>
                 </div>
             </div>
-        `;
+        `).join('') : '<p class="text-center text-gray-500 py-8">No live classes scheduled for you.</p>';
 
-        document.getElementById('leave-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-
-            try {
-                const staffSnap = await db.ref('staff').once('value');
-                const allStaff = Object.values(staffSnap.val() || {});
-                const classTeacher = allStaff.find(s => s.assignedClass === student.className && s.assignedSection === student.section);
-
-                const leaveApp = {
-                    id: Date.now().toString(),
-                    studentId: student.id,
-                    studentName: student.studentName,
-                    className: student.className,
-                    section: student.section,
-                    startDate: document.getElementById('leave-start-date').value,
-                    endDate: document.getElementById('leave-end-date').value,
-                    reason: document.getElementById('leave-reason').value,
-                    status: 'Pending',
-                    applicantType: 'student',
-                    approverId: classTeacher ? classTeacher.id : 'admin',
-                    lastUpdated: new Date().toISOString()
-                };
-                
-                if (new Date(leaveApp.endDate) < new Date(leaveApp.startDate)) {
-                    showToast("End date cannot be before start date.");
-                    return;
-                }
-
-                await db.ref('leaveApplications/' + leaveApp.id).set(leaveApp);
-                leaveApplications.push(leaveApp);
-                showToast("Leave application submitted successfully!");
-                renderLeaveApplication();
-            } catch (err) {
-                console.error("Leave submission error:", err);
-                showToast("Failed to submit application.");
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Application';
-            }
-        });
+        mainContent.innerHTML = `<div class="space-y-4">${classList}</div>`;
     }
 
+    // --- CHAT & CALL ---
+    function endCall() {
+        const modal = document.getElementById('call-modal');
+        const sound = document.getElementById('call-sound');
+        sound.pause();
+        sound.currentTime = 0;
+        modal.classList.remove('active');
+    }
+
+    function callDriver(driverId, driverName) {
+        const modal = document.getElementById('call-modal');
+        const sound = document.getElementById('call-sound');
+        document.getElementById('call-modal-title').textContent = `${driverName}`;
+        sound.play().catch(e => console.error("Audio play failed:", e));
+        modal.classList.add('active');
+    }
+
+    const chatCallback = (snapshot) => {
+        const messagesContainer = document.getElementById('chat-messages');
+        if (!messagesContainer) return;
+        const messages = Object.values(snapshot.val() || {}).sort((a, b) => a.timestamp - b.timestamp);
+        messagesContainer.innerHTML = messages.map(msg => `<div class="chat-bubble ${msg.senderId === student.id ? 'sent' : 'received'}">${msg.text}</div>`).join('');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    };
+    
+    function openChatWithDriver(driverId, driverName) {
+        const modal = document.getElementById('chat-modal');
+        document.getElementById('chat-header-title').textContent = `Chat with Driver (${driverName})`;
+        document.getElementById('chat-messages').innerHTML = '';
+        modal.classList.add('active');
+        
+        const chatId = `${driverId}_${student.id}`;
+        const chatRef = db.ref(`chats/${chatId}`);
+        if (currentChatListener) currentChatListener.ref.off('value', currentChatListener.callback);
+        
+        chatRef.on('value', chatCallback);
+        currentChatListener = { ref: chatRef, callback: chatCallback };
+
+        const chatForm = document.getElementById('chat-form');
+        const newForm = chatForm.cloneNode(true);
+        chatForm.parentNode.replaceChild(newForm, chatForm);
+
+        newForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const message = { senderId: student.id, receiverId: driverId, text, timestamp: Date.now() };
+            await chatRef.push(message);
+            input.value = '';
+        });
+    }
 
     // --- APP FLOW & NAVIGATION ---
+    const tabs = {
+        dashboard: { render: renderDashboard, title: "Dashboard" },
+        'id-card': { render: renderIdCard, title: "My ID Card" },
+        homework: { render: renderHomework, title: "Homework" },
+        liveclass: { render: renderLiveClass, title: "Live Class" },
+        transport: { render: renderTransport, title: "Transport" },
+        results: { render: renderResults, title: "Results" },
+        'leave-application': { render: renderLeaveApplication, title: "Leave Application" },
+        'my-profile': { render: renderMyProfile, title: "My Profile" },
+    };
+
     function setActiveTab(tabName) {
         cleanupDBListeners();
-        const pageTitles = { dashboard: 'Dashboard', 'id-card': 'My ID Card', homework: 'Homework', liveclass: 'Live Classes', attendance: 'My Attendance', results: 'My Results', diary: 'School Diary', leave: 'Apply for Leave' };
-        document.getElementById('page-title').textContent = pageTitles[tabName];
+        document.getElementById('page-title').textContent = tabs[tabName]?.title || "Student Portal";
         
-        // Sidebar
-        document.querySelectorAll('.sidebar .nav-button').forEach(b => {
-            const isActive = b.dataset.tab === tabName;
-            b.classList.toggle('bg-green-100', isActive);
-            b.classList.toggle('text-green-700', isActive);
-        });
+        document.querySelectorAll('.sidebar .nav-button').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+        document.querySelectorAll('#bottom-nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
 
-        // Bottom Nav
-        document.querySelectorAll('#bottom-nav button').forEach(b => {
-            b.classList.toggle('active', b.dataset.tab === tabName);
-        });
-
-        const renderFunction = { dashboard: renderDashboard, 'id-card': renderMyIDCard, homework: renderHomework, liveclass: renderLiveClass, attendance: renderAttendance, results: renderResults, diary: renderDiary, leave: renderLeaveApplication }[tabName];
-        if(renderFunction) renderFunction();
+        const renderFunction = tabs[tabName]?.render;
+        if(renderFunction) {
+            renderFunction();
+        } else {
+            mainContent.innerHTML = `<div class="card text-center">This feature is under development.</div>`;
+        }
     }
 
-    function initResponsiveUI() {
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        
-        const collapseIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>`;
-        const expandIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>`;
-
-        menuToggle.innerHTML = collapseIcon;
-        
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            const isCollapsed = sidebar.classList.contains('collapsed');
-            menuToggle.innerHTML = isCollapsed ? expandIcon : collapseIcon;
-        });
-
-        document.querySelectorAll('.nav-button, .bottom-nav-btn').forEach(btn => {
-            btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
-        });
-    }
-    
     async function runApp(loggedInUser) {
         document.getElementById('login-overlay').classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
-        mainContent.innerHTML = `<div class="text-center p-8"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div><p class="mt-4 text-gray-600">Loading your data...</p></div>`;
-        
+        mainContent.innerHTML = `<div class="text-center p-8">Loading your portal...</div>`;
+
         try {
-            const studentsSnap = await db.ref('students').once('value');
-            student = Object.values(studentsSnap.val() || {}).find(s => s.id === loggedInUser.id);
-            if (!student) { logout(); throw new Error('Student profile not found.'); }
-            
-            const [homeworkSnap, liveClassesSnap, attendanceSnap, resultsSnap, announcementsSnap, leaveAppsSnap] = await Promise.all([
-                db.ref('homework').orderByChild('className').equalTo(student.className).once('value'),
-                db.ref('liveClasses').orderByChild('className').equalTo(student.className).once('value'),
-                db.ref('attendance').orderByChild('className').equalTo(student.className).once('value'),
-                db.ref('results').orderByChild('className').equalTo(student.className).once('value'),
-                db.ref('announcements').once('value'),
-                db.ref('leaveApplications').orderByChild('studentId').equalTo(student.id).once('value')
+            const [studentsSnap, homeworkSnap, resultsSnap, liveClassesSnap, busesSnap, busTripsSnap, leavesSnap, staffSnap] = await Promise.all([
+                db.ref('students').once('value'),
+                db.ref('homework').once('value'),
+                db.ref('results').once('value'),
+                db.ref('liveClasses').once('value'),
+                db.ref('buses').once('value'),
+                db.ref('busTrips').once('value'),
+                db.ref('leaves').once('value'),
+                db.ref('staff').once('value'),
             ]);
             
-            const filterBySection = (snap) => Object.values(snap.val() || {}).filter(item => item.section === student.section);
-            
-            homework = filterBySection(homeworkSnap);
-            liveClasses = filterBySection(liveClassesSnap);
-            attendanceRecords = filterBySection(attendanceSnap);
-            results = filterBySection(resultsSnap);
-            announcements = Object.values(announcementsSnap.val() || {});
-            leaveApplications = Object.values(leaveAppsSnap.val() || {});
+            allStudents = Object.values(studentsSnap.val() || {});
+            allStaff = Object.values(staffSnap.val() || {});
+            allHomework = Object.values(homeworkSnap.val() || {});
+            allResults = Object.values(resultsSnap.val() || {});
+            allLiveClasses = Object.values(liveClassesSnap.val() || {});
+            allBuses = Object.values(busesSnap.val() || {});
+            allBusTrips = Object.values(busTripsSnap.val() || {});
+            allLeaves = Object.values(leavesSnap.val() || {});
 
-            document.getElementById('student-info').innerHTML = `<p class="font-semibold">${student.studentName}</p><p class="text-sm text-gray-500">Class ${student.className}-${student.section}</p>`;
-            document.getElementById('logout-btn').addEventListener('click', logout);
-            initResponsiveUI();
+            student = allStudents.find(s => s && s.id === loggedInUser.id);
+            if (!student) {
+                logout();
+                throw new Error('Student profile not found.');
+            }
+            
+            document.getElementById('student-info').innerHTML = `<p class="font-semibold">${student.studentName}</p><p class="text-sm text-gray-500">${student.className}-${student.section}</p>`;
+            
+            document.querySelectorAll('.nav-button, .bottom-nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
+            });
+
             setActiveTab('dashboard');
 
         } catch (error) {
@@ -779,11 +856,7 @@
             mainContent.innerHTML = `<div class="card text-red-700 bg-red-100"><h3 class="font-bold">Error</h3><p>Could not load your data. Please log out and try again.</p></div>`;
         }
     }
-
-    function showLogin() {
-        document.getElementById('login-overlay').classList.remove('hidden');
-    }
-
+    
     // --- INITIALIZATION ---
     document.addEventListener('DOMContentLoaded', () => {
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -795,30 +868,34 @@
             const admissionNo = document.getElementById('student-admission-no').value;
             const mobile = document.getElementById('student-mobile').value;
             const button = form.querySelector('button[type="submit"]');
-            button.disabled = true;
-            button.textContent = 'Verifying...';
+            button.disabled = true; button.textContent = 'Verifying...';
             
             try {
-                const studentsSnap = await db.ref('students').once('value');
-                const allStudents = Object.values(studentsSnap.val() || {});
-                const foundStudent = allStudents.find(s => s.admissionNumber === admissionNo && s.mobile === mobile);
-                
-                if (foundStudent) {
-                    const user = { role: 'student', id: foundStudent.id };
-                    sessionStorage.setItem('loggedInUser', JSON.stringify(user));
-                    runApp(user);
+                const snapshot = await db.ref('students').orderByChild('admissionNumber').equalTo(admissionNo).once('value');
+                if (snapshot.exists()) {
+                    const studentData = snapshot.val();
+                    const foundStudent = Object.values(studentData).find(s => s.mobile === mobile);
+                    
+                    if (foundStudent) {
+                        const user = { role: 'student', id: foundStudent.id };
+                        sessionStorage.setItem('loggedInUser', JSON.stringify(user));
+                        runApp(user);
+                    } else {
+                        showToast('Mobile number does not match admission number.');
+                    }
                 } else {
-                    showToast('Invalid Admission No. or Mobile No.');
+                    showToast('Admission number not found.');
                 }
             } catch (err) {
-                showToast('Login failed. Check connection.');
+                showToast('Login failed. Check your connection.');
                 console.error(err);
             } finally {
-                button.disabled = false;
-                button.textContent = 'Login';
+                button.disabled = false; button.textContent = 'Login';
             }
         });
         
+        document.getElementById('logout-btn').addEventListener('click', logout);
+
         let loggedInUser = null;
         try {
             const userData = sessionStorage.getItem('loggedInUser');
@@ -829,13 +906,10 @@
         
         if (loggedInUser && loggedInUser.role === 'student') {
             runApp(loggedInUser);
-        } else {
-            showLogin();
         }
     });
 
 </script>
-<script type="module" src="/index.tsx"></script>
 
 
 <script src="./script.js"></script></body></html>
